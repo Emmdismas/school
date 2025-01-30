@@ -1,0 +1,41 @@
+<?php
+session_start();
+require 'db.php'; // Unganisha na database
+
+function getResponse($userMessage, $conn) {
+    $responses = [
+        "hi" => "Salam! Karibu, ninaweza kusaidia na taarifa zifuatazo:\n1. Mahudhurio\n2. Matokeo ya mitihani\n3. Malipo\n4. Assignment",
+        "mahudhurio" => "Sawa, kupata taarifa za mahudhurio tafadhali tuma jina la shule yako:\n1. Kiumba\n2. Ziwani\n3. Kitangini",
+    ];
+
+    $userMessage = strtolower(trim($userMessage));
+
+    // Kama ni swali la kawaida
+    if (array_key_exists($userMessage, $responses)) {
+        return $responses[$userMessage];
+    }
+
+    // Kama ni jina la mwanafunzi, tafuta matokeo yake
+    $sql = "SELECT * FROM students WHERE name LIKE ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $userMessage);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        return "Matokeo ya " . $row['name'] . ":\n Kiswahili: " . $row['kiswahili'] . "\n English: " . $row['english'] . "\n Physics: " . $row['physics'] . "\n Chemistry: " . $row['chemistry'];
+    }
+
+    return "Samahani, sijaelewa. Tafadhali tumia maneno sahihi!";
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $input = json_decode(file_get_contents("php://input"), true);
+    $userMessage = $input['message'] ?? '';
+    $response = getResponse($userMessage, $conn);
+    header('Content-Type: application/json');
+    echo json_encode(["response" => $response]);
+    exit;
+}
+?>

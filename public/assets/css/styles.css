@@ -1,0 +1,81 @@
+/* General styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9fafb; /* Rangi ya nyuma */
+    color: #333;
+}
+
+/* Container styling */
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header styling */
+/* Header styling */
+header h2, h2 {
+    text-align: center;
+    color: #4154f1;
+    margin-bottom: 20px; /* Nafasi ya juu imeongezwa */
+}
+
+
+/* Table styles */
+.table, table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table th, .table td, table th, table td {
+    text-align: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.table thead, table thead {
+    background-color: #4154f1; /* Rangi ya kichwa cha jedwali */
+    color: white;
+}
+
+.table tbody tr:nth-child(odd), table tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.table tbody tr:hover, table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Button styling (Fanana na table header) */
+button, .btn {
+    width: 100%; /* Funika upana wa jedwali */
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9rem;
+    color: white;
+    background-color: #4154f1; /* Rangi sawa na header ya table */
+    border: none; /* Ondoa borders */
+    border-radius: 0; /* Hakikisha hakuna kona */
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover, .btn:hover {
+    background-color: #2f43cc; /* Hover effect */
+}
+
+/* Spacing styles for consistent positioning */
+header, .container h2 {
+    margin-bottom: 30px; /* Tenga nafasi zaidi */
+}
