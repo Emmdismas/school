@@ -1,0 +1,85 @@
+/* General styles for the registration form */
+.registration-container {
+    max-width: 600px; /* Ukubwa wa fomu sasa ni sawa na ile ya kwanza */
+    width: 100%;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header styling for the registration form */
+.registration-container h2 {
+    text-align: center;
+    color: #4154f1; /* Rangi ya kichwa */
+    margin-bottom: 20px;
+    font-size: 22px; /* Size ya font imefanana na ile ya kwanza */
+    font-family: 'Arial', sans-serif;
+}
+
+/* Form styling */
+.registration-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Nafasi kati ya vipengele vya fomu */
+}
+
+/* Label styling */
+.registration-form label {
+    font-size: 16px; /* Size imefanana na form ya kwanza */
+    color: #000; /* Rangi imebadilika kuwa nyeusi */
+    font-weight: 600; /* Iwe na unene wa kawaida */
+    margin-bottom: 5px;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Input fields styling */
+.registration-form input[type="text"],
+.registration-form input[type="date"],
+.registration-form input[type="email"],
+.registration-form input[type="file"],
+.registration-form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #333;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease;
+    font-family: 'Arial', sans-serif;
+}
+
+.registration-form input[type="text"]:focus,
+.registration-form input[type="date"]:focus,
+.registration-form input[type="email"]:focus,
+.registration-form select:focus {
+    border-color: #4154f1; /* Rangi ya kivuli wakati inapofanyiwa kazi */
+    outline: none;
+}
+
+/* File input styling */
+.registration-form input[type="file"] {
+    padding: 8px;
+    background-color: #f0f4f8;
+}
+
+/* Button styling */
+.registration-form button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #4154f1; /* Rangi ya kitufe */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: 'Arial', sans-serif;
+}
+
+.registration-form button[type="submit"]:hover {
+    background-color: #2f43cc; /* Rangi ya kitufe wakati wa hover */
+}

@@ -1,0 +1,140 @@
+/* General styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9fafb;
+    color: #333;
+}
+
+/* Container styling */
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header styling */
+header h2 {
+    text-align: center;
+    color: #4154f1;
+    margin-bottom: 20px;
+}
+
+/* Form styles */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #555;
+    font-size: 0.9rem;
+    flex: 1;
+}
+
+.form-group input,
+.form-group select  {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    outline: none;
+    flex: 2;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.form-group input:focus {
+    border-color: #4154f1;
+    box-shadow: 0 0 4px rgba(76, 175, 80, 0.3);
+}
+
+/* Buttons */
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button.btn-primary {
+    background-color: #4154f1;
+    color: #fff;
+}
+
+button.btn-primary:hover {
+    background-color: #4154f1;
+}
+
+button.delete {
+    background-color: #e53935;
+    color: white;
+}
+
+button.delete:hover {
+    background-color: #c62828;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table th, table td {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #4154f1;
+    color: white;
+    text-align: center;
+}
+
+table td {
+    text-align: center;
+}
+
+table tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Note styles */
+.note {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-left: 4px solid #4154f1;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.note p {
+    margin: 0 0 5px;
+    font-weight: bold;
+}
