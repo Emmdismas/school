@@ -1,9 +1,13 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Marks - School Management System</title>
+    <link href="{{ asset('assets/css/styles.css') }}" rel="stylesheet"> <!-- External CSS -->
+</head>
 
-@yield('css')
-<link rel="stylesheet" href="{{ asset('assets/css/styles.css') }}">
-
-@section('content')
+<body>
 <div class="container">
 
     <h2>Upload Marks for {{ $class }}</h2>
@@ -11,22 +15,38 @@
     @if(isset($studentsWithMarks) && $studentsWithMarks->isEmpty())
         <p>No students found for {{ $class }}.</p>
     @else
-    <form id="marksForm" method="POST" action="{{ route('marks.store', ['examType' => $examType, 'class' => $class]) }}">
+        <form method="POST" action="{{ route('marks.store', ['class' => $class]) }}">
+            @csrf
 
-    @csrf
-    <input type="hidden" name="examType" value="{{ $examType }}">
-    <input type="hidden" name="class" value="{{ $class }}">
-    <!-- Additional form fields -->
+            <input type="hidden" name="class" value="{{ $class }}">
 
 
+                        <!-- Aina ya Mtihani -->
+            <label for="examType"><b>Select Exam Type:</b></label>
+            <select name="examType" id="examType" required>
+                @foreach (['Mock', 'Terminal', 'Midterm', 'Test'] as $exam)
+                    <option value="{{ $exam }}" {{ request('examType') == $exam ? 'selected' : '' }}>{{ $exam }}</option>
+                @endforeach
+            </select>
+            <br><br>
 
-            @if(isset($examType) && !empty($examType))
-    <h4 class="text-center text-secondary">
-        Exam Type: <span class="text-info">{{ $examType }}</span>
-    </h4>
-@else
-    <p class="text-danger">Exam type is missing. Please provide an exam type.</p>
-@endif
+
+            <!-- Mwezi Selection -->
+            <label for="month"><b>Select Month:</b></label>
+            <select name="month" id="month">
+                @foreach (['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] as $month)
+                    <option value="{{ $month }}" {{ request('month') == $month ? 'selected' : '' }}>{{ $month }}</option>
+                @endforeach
+            </select>
+            <br></br>
+
+            <!-- Mwaka wa Masomo -->
+            <label for="academic_year"><b>Academic Year:</b></label>
+            <select name="academic_year" id="academic_year">
+                @foreach (['2024/25', '2025/26', '2026/27', '2027/28', '2028/29', '2029/30'] as $year)
+                    <option value="{{ $year }}" {{ request('academic_year') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                @endforeach
+            </select>
 
             <!-- Student Table -->
             <table class="table table-bordered">
@@ -39,82 +59,34 @@
                         <th>Subject 3</th>
                         <th>Subject 4</th>
                         <th>Subject 5</th>
-                        <th>Total</th>
-                        <th>Average</th>
-                        <th>Position</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($studentsWithMarks as $student)
+                    @foreach ($studentsWithMarks as $index => $student)
                         <tr>
-                            <!-- Display Student No -->
                             <td>
-                                {{ $student['student_number'] }}
-                                <input type="hidden" name="students[{{ $loop->index }}][student_number]" value="{{ $student['student_number'] }}">
+                                {{ $student['student_id'] }}
+                                <input type="hidden" name="students[{{ $index }}][student_id]" value="{{ $student['student_id'] }}">
                             </td>
 
-                            <!-- Display Student Name -->
                             <td>
                                 {{ $student['student_name'] }}
-                                <input type="hidden" name="students[{{ $loop->index }}][student_name]" value="{{ $student['student_name'] }}">
+                                <input type="hidden" name="students[{{ $index }}][student_name]" value="{{ $student['student_name'] }}">
                             </td>
 
-                            <!-- Input Fields for Marks -->
-                            <td>
-                                <input type="number"
-                                       name="students[{{ $loop->index }}][subject1]"
-                                       value="{{ $student['subject1'] ?? '' }}"
-                                       min="0"
-                                       max="100"
-                                       required>
-                            </td>
-                            <td>
-                                <input type="number"
-                                       name="students[{{ $loop->index }}][subject2]"
-                                       value="{{ $student['subject2'] ?? '' }}"
-                                       min="0"
-                                       max="100"
-                                       required>
-                            </td>
-                            <td>
-                                <input type="number"
-                                       name="students[{{ $loop->index }}][subject3]"
-                                       value="{{ $student['subject3'] ?? '' }}"
-                                       min="0"
-                                       max="100"
-                                       required>
-                            </td>
-                            <td>
-                                <input type="number"
-                                       name="students[{{ $loop->index }}][subject4]"
-                                       value="{{ $student['subject4'] ?? '' }}"
-                                       min="0"
-                                       max="100"
-                                       required>
-                            </td>
-                            <td>
-                                <input type="number"
-                                       name="students[{{ $loop->index }}][subject5]"
-                                       value="{{ $student['subject5'] ?? '' }}"
-                                       min="0"
-                                       max="100"
-                                       required>
-                            </td>
+                            <!-- Alama za Masomo -->
+                            @foreach (range(1, 5) as $subjectNumber)
+                                <td>
+                                    <input type="number"
+                                           name="students[{{ $index }}][subject{{ $subjectNumber }}]"
+                                           value="{{ $student['subject' . $subjectNumber] ?? '' }}"
+                                           min="0"
+                                           max="100"
+                                           required>
+                                </td>
+                            @endforeach
 
-                            <td>
-                                {{ $student['TotalMarks'] }}
-                                <input type="hidden" name="students[{{ $loop->index }}][TotalMarks]" value="{{ $student['student_name'] }}">
-                            </td>
-
-                            <td>
-                                {{ $student['averageMarks'] }}
-                                <input type="hidden" name="students[{{ $loop->index }}][averageMarks]" value="{{ $student['student_name'] }}">
-                            </td>
-
-                            <td>
-                                {{ $student['position'] }}
-                                <input type="hidden" name="students[{{ $loop->index }}][position]" value="{{ $student['student_name'] }}">
-                            </td>
+                           
                         </tr>
                     @endforeach
                 </tbody>
@@ -122,8 +94,9 @@
 
             <button type="submit" class="btn btn-primary mt-3">Submit Marks</button>
         </form>
-        <button onclick="window.location.href='{{ url('/') }}'" class="btn btn-secondary mt-3">Home</button>
 
+        <button onclick="window.location.href='{{ url('/') }}'" class="btn btn-secondary mt-3">Home</button>
     @endif
 </div>
-@endsection
+</body>
+</html>

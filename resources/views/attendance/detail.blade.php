@@ -1,13 +1,16 @@
 <div>
     <!-- If you do not have a consistent goal in life, you can not live it in a consistent way. - Marcus Aurelius -->
 </div>
-@extends('layouts.app')
 
-@section('css')
-<link rel="stylesheet" href="{{ asset('assets/css/styles.css') }}">
-@endsection
-
-@section('content')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Attendance System</title>
+    <link href="{{ asset('assets/css/styles.css') }}" rel="stylesheet"> <!-- External CSS -->
+</head>
+<body>
 <div class="container">
     <h2 class="text-center mb-4">Attendance Details for {{ $class }}</h2>
         <h2>Attendance date :  {{ $date }}</h2>
@@ -22,7 +25,7 @@
         <tbody>
             @foreach ($attendanceDetails as $student)
             <tr>
-                <td>{{ $student->student_number }}</td>
+                <td>{{ $student->student_id }}</td>
                 <td>{{ $student->student_name }}</td>
                 <td>{{ $student->status }}</td>
             </tr>
@@ -30,4 +33,4 @@
         </tbody>
     </table>
 </div>
-@endsection
+</body>

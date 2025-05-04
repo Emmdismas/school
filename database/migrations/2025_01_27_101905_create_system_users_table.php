@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('system_users', function (Blueprint $table) {
             $table->id(); // Primary Key
             $table->string('school_name');
+            $table->unsignedBigInteger('school_id'); 
             $table->string('role');
             $table->string('name');
             $table->string('password');

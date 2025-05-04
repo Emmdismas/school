@@ -9,15 +9,29 @@ return new class extends Migration {
     {
         Schema::create('contacts', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('school_id');
             $table->string('name');
             $table->string('email');
             $table->text('message');
             $table->timestamps();
+            $table->foreign('school_id')
+                  ->references('school_id')
+                  ->on('schools')
+                  ->onDelete('cascade'); // Futa wanafunzi wote wa shule ikiwa shule imefutwa
         });
     }
 
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('contacts');
+        if (Schema::hasTable('contacts')) {
+            Schema::table('contacts', function (Blueprint $table) {
+                if (Schema::hasColumn('contacts', 'school_id')) {
+                    $table->dropForeign(['school_id']);
+                }
+            });
+    
+            Schema::dropIfExists('contacts');
+        }
     }
+    
 };

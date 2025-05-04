@@ -3,18 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class SystemUser extends Model
+class SystemUser extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'system_users';
 
-    protected $fillable = [
-        'school_name',
-        'role',
-        'name',
-        'password',
-    ];
+    // Safu zinazoruhusiwa kujazwa kwa mass assignment
+    protected $fillable = ['school_name', 'school_id', 'role', 'name', 'password'];
+
+    // Safu zinazofichwa wakati wa kutoa data (kwa mfano, API call)
+    protected $hidden = ['password'];
+
+    // Ikiwa hakuna haja ya kufuatilia timestamps
+    public $timestamps = false;
+
+    // Uhusiano na meza ya schools
+    public function school()
+    {
+        return $this->belongsTo(School::class, 'school_id', 'id'); // 'id' ni primary key ya schools
+    }
 }

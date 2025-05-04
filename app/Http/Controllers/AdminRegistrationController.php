@@ -22,6 +22,7 @@ class AdminRegistrationController extends Controller
     {
         $validated = $request->validate([
             'school_name' => 'required|string|max:255',
+            'school_id' => 'required|integer',
             'role' => 'required|in:admin,headmaster,teacher,student',
             'name' => 'required|string|max:255',
             'password' => 'required|string|min:8',
@@ -30,6 +31,7 @@ class AdminRegistrationController extends Controller
         // Create the system user
         SystemUser::create([
             'school_name' => $validated['school_name'],
+            'school_id' => $validated['school_id'],
             'role' => $validated['role'],
             'name' => $validated['name'],
             'password' => bcrypt($validated['password']), // Encrypt password

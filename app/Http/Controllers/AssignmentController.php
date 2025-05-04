@@ -3,86 +3,115 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\HomeworkTableClassA;
-use App\Models\HomeworkTableClassB;
-use App\Models\HomeworkTableClassC;
-use App\Models\HomepackageTableClassA;
-use App\Models\HomepackageTableClassB;
-use App\Models\HomepackageTableClassC;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Assignments;
 
 class AssignmentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    // Index method to display assignments for a specific class and type
-    public function index($type, $class)
+    public function index(Request $request, $class)
+{
+    $type = $request->input('assignment_type'); // Fetch assignment type
+    $validTypes = ['homework', 'homepackage'];
+    $validClasses = [
+        'Standard_1', 'Standard_2', 'Standard_3', 'Standard_4',
+        'Standard_5', 'Standard_6', 'Standard_7',
+        'Form_1', 'Form_2', 'Form_3', 'Form_4',
+        'Form_5', 'Form_6'
+    ];
+
+    if (!in_array($class, $validClasses)) {
+        return abort(404, 'Invalid assignment type or class.');
+    }
+
+    // Pata school_id ya mtumiaji aliyelogin
+    $schoolId = Auth::user()->school_id ?? null;
+    if (!$schoolId) {
+        return abort(403, 'Unauthorized access.');
+    }
+
+    // Fetch assignments kwa school_id, class, na type
+    $assignments = Assignments::where('school_id', $schoolId)
+        ->where('class', $class)
+        ->where('assignment_type', $type)
+        ->get();
+
+    $title = ucfirst($type) . ' Assignments for ' . str_replace('_', ' ', $class);
+    $route = route('assignments.store', ['type' => $type, 'class' => $class]);
+
+    return view('assignment.view', compact('assignments', 'type', 'class', 'title', 'route'));
+}
+
+
+    public function create(Request $request, $class)
     {
-        // Validate type and class
+        $type = $request->input('assignment_type');
+        
         $validTypes = ['homework', 'homepackage'];
-        $validClasses = ['Class_A', 'Class_B', 'Class_C'];
+        $validClasses = [  'Standard_1', 'Standard_2', 'Standard_3', 'Standard_4',
+        'Standard_5', 'Standard_6', 'Standard_7',
+        'Form_1', 'Form_2', 'Form_3', 'Form_4',
+        'Form_5', 'Form_6'];
+
+        if (!in_array($class, $validClasses)) {
+            return abort(404, 'Invalid assignment class.');
+        }
+
+
+        $schoolId = Auth::user()->school_id ?? null;
+        if (!$schoolId) {
+            return abort(403, 'Unauthorized access.');
+        }
+
+        // Fetch assignments za school_id husika pekee
+        $assignments = Assignments::where('school_id', $schoolId)
+        ->where('class', $class)
+        ->get();
+
+        $title = ucfirst($type) . "Upload Assignment  for Class " . strtoupper($class);
+      
+        return view('assignment.upload', compact('title', 'type', 'class', 'assignments'));
+    }
+
+    public function store(Request $request, $class)
+    {
+        $type = $request->input('assignment_type');
+
+        $validTypes = ['homework', 'homepackage'];
+        $validClasses = [  'Standard_1', 'Standard_2', 'Standard_3', 'Standard_4',
+        'Standard_5', 'Standard_6', 'Standard_7',
+        'Form_1', 'Form_2', 'Form_3', 'Form_4',
+        'Form_5', 'Form_6'];
 
         if (!in_array($type, $validTypes) || !in_array($class, $validClasses)) {
             return abort(404, 'Invalid assignment type or class.');
         }
 
-        // Get the appropriate model
-        $model = $this->getModel($type, $class);
-
-        // Fetch assignments using Eloquent
-        $assignments = $model::all(); // Data now contains Eloquent objects
-
-        // Prepare variables for the view
-        $title = ucfirst($type) . ' Assignments for ' . str_replace('_', ' ', $class);
-        $route = route('assignments.store', ['type' => $type, 'class' => $class]);
-
-        // Return the view
-        return view('assignment.view', compact('assignments', 'type', 'class', 'title', 'route'));
-
-    }
-
-
-
-    public function create($type, $class)
-    {
-        $title = ucfirst($type) . " for Class " . strtoupper($class);
-        $route = route('assignments.store', ['type' => $type, 'class' => $class]);
-
-        $model = $this->getModel($type, $class);
-        $assignments = $model::all(); // Pata assignments zote kwa class na type
-
-        return view('assignment.upload', compact('title', 'type', 'class', 'route', 'assignments'));
-    }
-
-
-    public function store(Request $request, $type, $class)
-    {
-        // Validate type and class
-        $validTypes = ['homework', 'homepackage'];
-        $validClasses = ['Class_A', 'Class_B', 'Class_C'];
-
-        if (!in_array($type, $validTypes) || !in_array($class, $validClasses)) {
-            return abort(404, 'Invalid assignment type or class.');
-        }
-
-        // Validate inputs
         $request->validate([
             'assignment_name' => 'required|string|max:255',
-            'subject_matter' => 'required|string|max:255',
+            'subject_master' => 'required|string|max:255',
             'deadline' => 'required|date',
             'upload_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
-        // Get the appropriate model
-        $model = $this->getModel($type, $class);
+ 
 
-        // Store assignment content
+        $schoolId = Auth::user()->school_id ?? null;
+        if (!$schoolId) {
+            return back()->with('error', 'User does not belong to any school.');
+        }
+
         $fileContent = file_get_contents($request->file('upload_file')->getRealPath());
         $fileName = $request->file('upload_file')->getClientOriginalName();
 
-        $model::create([
+        Assignments::create([
+            'school_id' => $schoolId, 
+            'class' => $class,
             'assignment_name' => $request->assignment_name,
-            'subject_matter' => $request->subject_matter,
+            'assignment_type' => $type,
+            'subject_master' => $request->subject_master,
             'deadline' => $request->deadline,
             'assignment_file' => $fileName,
             'file_content' => $fileContent,
@@ -91,103 +120,43 @@ class AssignmentController extends Controller
         return back()->with('success', 'Assignment uploaded successfully.');
     }
 
-
-    public function download($type, $class, $id)
+    public function download(Request $request, $class, $id)
     {
-        $model = $this->getModel($type, $class);
-        $assignment = $model::find($id);
+        $type = $request->input('assignment_type');
+        $assignment = Assignments::find($id);
 
-        if (!$assignment) {
+        if (!$assignment || $assignment->school_id !== Auth::user()->school_id) {
             abort(404, 'Assignment not found.');
         }
 
-        $fileContent = $assignment->file_content;
-        $fileName = $assignment->assignment_file;
-
-        return response($fileContent)
+        return response($assignment->file_content)
             ->header('Content-Type', 'application/octet-stream')
-            ->header('Content-Disposition', "attachment; filename=\"$fileName\"");
+            ->header('Content-Disposition', "attachment; filename=\"{$assignment->assignment_file}\"");
     }
 
-    private function getModel($type, $class)
+    public function destroy(Request $request, $class, $id)
     {
-        $modelMap = [
-            'homework' => [
-                'Class_A' => \App\Models\HomeworkTableClassA::class,
-                'Class_B' => \App\Models\HomeworkTableClassB::class,
-                'Class_C' => \App\Models\HomeworkTableClassC::class,
-            ],
-            'homepackage' => [
-                'Class_A' => \App\Models\HomepackageTableClassA::class,
-                'Class_B' => \App\Models\HomepackageTableClassB::class,
-                'Class_C' => \App\Models\HomepackageTableClassC::class,
-            ],
-        ];
-
-        if (isset($modelMap[$type][$class])) {
-            return $modelMap[$type][$class];
-        }
-
-        throw new \Exception("Model not found for type: $type and class: $class");
-    }
-
-
-    // Method to view a specific assignment
-    public function show()
-    {
-
-    }
-
-
-    // Method to delete an assignment
-    public function destroy($type, $class, $id)
-    {
-        // Validate type and class
+        $type = $request->input('assignment_type');
         $validTypes = ['homework', 'homepackage'];
-        $validClasses = ['Class_A', 'Class_B', 'Class_C'];
+        $validClasses = [  'Standard_1', 'Standard_2', 'Standard_3', 'Standard_4',
+        'Standard_5', 'Standard_6', 'Standard_7',
+        'Form_1', 'Form_2', 'Form_3', 'Form_4',
+        'Form_5', 'Form_6'];
 
-        if (!in_array($type, $validTypes) || !in_array($class, $validClasses)) {
+        if (!in_array($class, $validClasses)) {
             return abort(404, 'Invalid assignment type or class.');
         }
 
-        $model = $this->getModel($type, $class);
-        $assignment = $model::findOrFail($id);
+        $assignment = Assignments::find($id);
 
-        // Delete the file
-        if (file_exists(storage_path('app/public/' . $assignment->assignment_file))) {
-            unlink(storage_path('app/public/' . $assignment->assignment_file));
+        if (!$assignment || $assignment->school_id !== Auth::user()->school_id) {
+            return abort(403, 'Unauthorized action.');
         }
 
-        // Delete the record
         $assignment->delete();
 
         return redirect()->back()->with('success', 'Assignment deleted successfully.');
     }
 
-
-
-
-    /**
-     * Display the specified resource.
-     */
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
+   
 }

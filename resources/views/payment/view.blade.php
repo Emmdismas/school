@@ -18,7 +18,7 @@
                     <th>Student ID</th>
                     <th>Stud Name</th>
                     <th>Payment Type</th>
-                    <th>Amount</th>
+                    <th>Amount (Tsh)</th>
                     <th>Receipt</th>
                 </tr>
             </thead>
@@ -26,12 +26,12 @@
                 @foreach ($payments as $payment)
                     <tr>
                         <td>{{ $payment->student_id }}</td>
-                        <td>{{ $payment->student->name }}</td>
+                        <td>{{ $payment->student_name }}</td>
                         <td>{{ $payment->payment_type }}</td>
                         <td>${{ $payment->amount }}</td>
                         <td>
                             @if($payment->receipt_content)
-                                <a href="{{ route('download.receipt', ['class' => $class, 'id' => $payment->id]) }}" class="btn">Download</a>
+                                <a href="{{ route('payment.download', ['class' => $class, 'id' => $payment->id]) }}" class="btn">Download</a>
                             @else
                                 N/A
                             @endif

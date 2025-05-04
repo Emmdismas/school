@@ -369,13 +369,13 @@
 </li>
 
           <li>
-            <a href="#">
+            <a href="{{ route('attendance.summary', ['class' => 'Class_B']) }}">
               <i class="bi bi-circle"></i><span>Class B</span>
             </a>
           </li>
 
           <li>
-            <a href="#">
+            <a href="{{ route('attendance.summary', ['class' => 'Class_C']) }}">
               <i class="bi bi-circle"></i><span>Class C</span>
             </a>
           </li>
@@ -416,71 +416,33 @@
 
 
       <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-bar-chart"></i><span>Exam Results</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
+  <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
+    <i class="bi bi-bar-chart"></i><span>Exam Results</span><i class="bi bi-chevron-down ms-auto"></i>
+  </a>
 
-
-        <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-        <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#for-nav" data-bs-toggle="collapse"  >
-          <i class="bi bi-circle"></i><span>midterm Exam Results</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="for-nav" class="nav-content collapse " >
-
-          <li>
-            <a href="{{ route('marks.show', ['examType' => 'Midterm', 'class' => 'Class_A' ]) }}">
-              <i class="bi bi-circle"></i><span>Class A</span>
-            </a>
-          </li>
-
-          <li>
-            <a href=" {{ route('marks.show', ['examType' => 'Midterm', 'class' => 'Class_B']) }}">
-              <i class="bi bi-circle"></i><span>Class B</span>
-            </a>
-          </li>
-
-          <li>
-            <a href=" {{ route('marks.show', ['examType' => 'Midterm', 'class' => 'Class_C']) }}">
-              <i class="bi bi-circle"></i><span>Class C</span>
-            </a>
-          </li>
-</ul>
-</li>
-
-
-<li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#foorm-nav" data-bs-toggle="collapse"  >
-          <i class="bi bi-circle"></i><span>Terminal Exams Results</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="foorm-nav" class="nav-content collapse " >
-
-        <li>
-    <a href="{{ route('marks.show', ['class' => 'Class_A', 'examType'=> 'Terminal']) }}">
+  <ul id="charts-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+    <li>
+      <a href="{{ route('marks.show', ['class' => 'Class_A']) }}">
         <i class="bi bi-circle"></i><span>Class A</span>
-    </a>
+      </a>
+    </li>
+    <li>
+      <a href="{{ route('marks.show', ['class' => 'Class_B']) }}">
+        <i class="bi bi-circle"></i><span>Class B</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ route('marks.show', ['class' => 'Class_C']) }}">
+        <i class="bi bi-circle"></i><span>Class C</span>
+      </a>
+    </li>
+  </ul>
 </li>
-
-          <li>
-            <a href="{{ route('marks.show', ['class' => 'Class_B', 'examType'=> 'Terminal']) }}">
-              <i class="bi bi-circle"></i><span>Class B</span>
-            </a>
-          </li>
-
-          <li>
-            <a href="{{ route('marks.show', ['class' => 'Class_C', 'examType'=> 'Terminal']) }}">
-              <i class="bi bi-circle"></i><span>Class C</span>
-            </a>
-          </li>
-</ul>
 
 
 
             <!--selection of class -uploading marks -->
 
-
-</ul>
-          </li>
 
           <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#forr-nav" data-bs-toggle="collapse"  >
@@ -739,6 +701,12 @@
           <span>Add New teacher</span>
         </a>
       </li><!-- End Register Page Nav -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{{ route('schools.create')}}">
+          <i class="bi bi-card-list"></i>
+          <span>Add School</span>
+        </a>
+      </li><!-- End Register Page Nav -->
 
       <li class="nav-item">
         <a class="nav-link collapsed" href="#">
@@ -943,14 +911,14 @@
   <!-- ======= Footer ======= -->
   <footer id="footer" class="footer">
     <div class="copyright">
-      &copy; Copyright <strong><span>EAlphaforce</span></strong>. All Rights Reserved
+      &copy; Copyright <strong><span>GanTek Technologies</span></strong>. All Rights Reserved
     </div>
     <div class="credits">
       <!-- All the links in the footer should remain intact. -->
       <!-- You can delete the links only if you purchased the pro version. -->
       <!-- Licensing information: https://bootstrapmade.com/license/ -->
       <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
-      Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      Designed by <a href="https://bootstrapmade.com/">GanTek Technologies</a>
     </div>
   </footer><!-- End Footer -->
 

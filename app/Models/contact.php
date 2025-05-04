@@ -11,4 +11,9 @@ class Contact extends Model
 
     protected $table = 'contacts';
     protected $fillable = ['name', 'email', 'message'];
+     // Uhusiano na meza ya schools
+     public function school()
+     {
+         return $this->belongsTo(School::class, 'school_id');
+     }
 }

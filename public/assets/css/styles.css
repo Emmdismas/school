@@ -9,7 +9,7 @@ body {
 
 /* Container styling */
 .container {
-    max-width: 900px;
+    max-width: 1340px;
     margin: 30px auto;
     padding: 20px;
     background-color: #fff;
@@ -78,4 +78,9 @@ button:hover, .btn:hover {
 /* Spacing styles for consistent positioning */
 header, .container h2 {
     margin-bottom: 30px; /* Tenga nafasi zaidi */
+}
+.profile-btn {
+    display: inline-block;
+    width: 120px; /* Ifanye button iwe na upana sawasawa */
+    text-align: center;
 }

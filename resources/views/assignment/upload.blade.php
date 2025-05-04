@@ -13,7 +13,7 @@
         </header>
 
         <!-- Assignment Form -->
-        <form action="{{ $route }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('assignments.store', ['class' => $class]) }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="form-group">
                 <label for="assignmentName">Assignment Name:</label>
@@ -21,8 +21,18 @@
             </div>
 
             <div class="form-group">
-                <label for="subjectMatter">Subject Matter:</label>
-                <input type="text" id="subjectMatter" name="subject_matter" placeholder="Enter subject matter" required>
+                <label for="assignmentType">Assignment Type:</label>
+                <select id="assignmentType" name="assignment_type" required>
+                    <option value="" disabled selected>Select assignment type</option>
+                    <option value="homework">Homework</option>
+                    <option value="homepackage">Homepackage</option>
+                </select>
+            </div>
+
+
+            <div class="form-group">
+                <label for="subjectMaster">Subject Master:</label>
+                <input type="text" id="subjectMaster" name="subject_master" placeholder="Enter subject master" required>
             </div>
 
             <div class="form-group">
@@ -58,7 +68,8 @@
                 <tr>
                     <th>No</th>
                     <th>Name</th>
-                    <th>Subject Matter</th>
+                    <th>Type</th>
+                    <th>Subject Master</th>
                     <th>Deadline</th>
                     <th>Download</th>
                     <th>Delete</th>
@@ -69,7 +80,8 @@
     <tr>
         <td>{{ $loop->iteration }}</td>
         <td>{{ $assignment->assignment_name }}</td>
-        <td>{{ $assignment->subject_matter }}</td>
+        <td>{{ $assignment->assignment_type }}</td>
+        <td>{{ $assignment->subject_master }}</td>
         <td>{{ $assignment->deadline }}</td>
 
 <td>
@@ -91,6 +103,10 @@
             </tbody>
         </table>
     </div>
+<!-- Back to Home Button -->
+<div style="margin-top: 20px; text-align: center;">
+    <a href="{{ url('/teacher') }}" class="btn-back-home">← Back to Home</a>
+</div>
 
     <script src="script.js"></script>
 </body>

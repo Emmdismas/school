@@ -2,82 +2,189 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Models\StudentListClassA;
-use App\Models\StudentListClassB;
-use App\Models\StudentListClassC;
-use App\Models\AttendanceTableClassA;
-use App\Models\AttendanceTableClassB;
-use App\Models\AttendanceTableClassC;
+use App\Models\Students;
+use App\Models\AttendanceRecord;
 
 class AttendanceController extends Controller
 {
-    private function getModel($class)
+
+
+    public function summary($class)
     {
-        $models = [
-            'Class_A' => [
-                'students' => StudentListClassA::class,
-                'attendance' => AttendanceTableClassA::class,
-            ],
-            'Class_B' => [
-                'students' => StudentListClassB::class,
-                'attendance' => AttendanceTableClassB::class,
-            ],
-            'Class_C' => [
-                'students' => StudentListClassC::class,
-                'attendance' => AttendanceTableClassC::class,
-            ],
+        
+        // Chukua school_id ya mtumiaji aliyepo sasa
+        $schoolId = auth()->user()->school_id; 
+    
+        $summary = AttendanceRecord::selectRaw(
+            'attendance_date,
+            class,
+            SUM(CASE WHEN status = "Present" THEN 1 ELSE 0 END) as present,
+            SUM(CASE WHEN status = "Absent" THEN 1 ELSE 0 END) as absent,
+            SUM(CASE WHEN status = "Sick" THEN 1 ELSE 0 END) as sick,
+            SUM(CASE WHEN status = "Not Allowed" THEN 1 ELSE 0 END) as not_allowed,
+            COUNT(*) as total_students'
+        )
+        ->where('school_id', $schoolId) // ✅ Filter kwa school_id
+        ->groupBy('attendance_date')
+        ->groupBy('class')
+        ->orderBy('attendance_date','desc')
+        ->get();
+    
+        foreach ($summary as $record) {
+            $record->percentage = ($record->total_students > 0) ? ($record->present / $record->total_students) * 100 : 0;
+        }
+    
+        return view('attendance.summary', compact('summary', 'class'));
+    }
+    
+
+    public function details($class, $date)
+    {
+
+            // Orodha ya madarasa yanayokubalika
+        $validClasses = [
+            'Standard_1', 'Standard_2', 'Standard_3', 'Standard_4', 
+            'Standard_5', 'Standard_6', 'Standard_7',
+            'Form_1', 'Form_2', 'Form_3', 'Form_4', 'Form_5', 'Form_6'
         ];
 
-        if (isset($models[$class])) {
-            return $models[$class];
+        // Angalia kama darasa lililotumwa ni sahihi
+        if (!in_array($class, $validClasses)) {
+            abort(400, 'Invalid class selection.');
         }
 
-        throw new \Exception("Invalid class: $class");
+
+        $school_id = Auth::user()->school_id; // Pata school_id kutoka kwa auth
+
+
+        $presentStudents = AttendanceRecord::where('attendance_date', $date)
+            ->where('class', $class)
+            ->where('status', 'Present')
+            ->where('school_id', $school_id)
+            ->get();
+
+        $absentStudents = AttendanceRecord::where('attendance_date', $date)
+            ->where('class', $class)
+            ->where('status', 'Absent')
+            ->where('school_id', $school_id)
+            ->get();
+
+        $sickStudents = AttendanceRecord::where('attendance_date', $date)
+            ->where('class', $class)
+            ->where('status', 'Sick')
+            ->where('school_id', $school_id)
+            ->get();
+
+        $notAllowedStudents = AttendanceRecord::where('attendance_date', $date)
+            ->where('class', $class)
+            ->where('status', 'Not Allowed')
+            ->where('school_id', $school_id)
+            ->get();
+
+        return view('attendance.details', compact(
+            'date', 'class', 'presentStudents', 'absentStudents', 'sickStudents', 'notAllowedStudents'
+        ));
     }
+
+
+
+    public function calculateAttendancePercentage($studentId, $class)
+{
+
+      // Orodha ya madarasa yanayokubalika
+      $validClasses = [
+        'Standard_1', 'Standard_2', 'Standard_3', 'Standard_4', 
+        'Standard_5', 'Standard_6', 'Standard_7',
+        'Form_1', 'Form_2', 'Form_3', 'Form_4', 'Form_5', 'Form_6'
+    ];
+
+    // Angalia kama darasa lililotumwa ni sahihi
+    if (!in_array($class, $validClasses)) {
+        abort(400, 'Invalid class selection.');
+    }
+
+
+$schoolId = $this->getSchoolId();
+
+// Hesabu jumla ya siku ambazo attendance ilifanyika
+$totalClasses = AttendanceRecord::where('school_id', $schoolId)
+    ->distinct()
+    ->count('attendance_date');
+
+// Hesabu idadi ya siku mwanafunzi alikuwa "Present"
+$totalClassesAttended = AttendanceRecord::where('school_id', $schoolId)
+    ->where('student_id', $studentId)
+    ->where('status', 'Present')
+    ->count();
+
+// Epuka kugawanya kwa 0
+$attendancePercentage = ($totalClasses > 0) ? ($totalClassesAttended / $totalClasses) * 100 : 0;
+
+return $attendancePercentage;
+}
+
 
     public function index(Request $request, $class)
     {
         // Validate the class
-        if (!in_array($class, ['Class_A', 'Class_B', 'Class_C'])) {
+        if (!in_array($class, [ 'Standard_1', 'Standard_2', 'Standard_3', 'Standard_4', 
+        'Standard_5', 'Standard_6', 'Standard_7',
+        'Form_1', 'Form_2', 'Form_3', 'Form_4', 'Form_5', 'Form_6']))
+         {
             abort(404, 'Invalid Class');
         }
-
-        // Fetch the appropriate models for the class
-        $models = $this->getModel($class);
-        $studentModel = $models['students'];
-        $attendanceModel = $models['attendance'];
-
-        // Fetch students based on the class
-        $students = $studentModel::all();
-
-        // Count attendance status dynamically
-        $statusCounts = $attendanceModel::selectRaw('status, COUNT(*) as count')
+    
+        // Get school_id from session
+        $schoolId = Auth::user()->school_id;
+        if (!$schoolId) {
+            logger('School ID is missing in session.');
+            abort(403, 'School ID not found.');
+        } else {
+            logger('School ID retrieved successfully: ' . $schoolId);
+        }
+    
+         // Fetch students based on the class and school_id
+         $students = Students::where('school_id', $schoolId)
+         ->where('class', $class)
+         ->get();
+    
+        // Count attendance status dynamically for the specific school
+        $statusCounts = AttendanceRecord::where('school_id', $schoolId)
+            ->where('class', $class)
+            ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
-
+        logger('Status Counts:', $statusCounts);
+    
         // Fetch students for a specific status if requested
         $studentsForStatus = [];
         if ($request->has('status')) {
             $status = $request->query('status');
-            $studentsForStatus = $attendanceModel::where('status', $status)
-                ->get(['student_number', 'student_name']);
+            $studentsForStatus = AttendanceRecord::where('school_id', $schoolId)
+                ->where('class', $class)
+                ->where('status', $status)
+                ->get(['student_id', 'student_name']);
+            logger('Students for Status:', $studentsForStatus->toArray());
         }
-
+    
         // Fetch total attendance and percentages for each student dynamically
         foreach ($students as $student) {
-            $attendanceData = $attendanceModel::where('student_number', $student->student_number)
+            $attendanceData = AttendanceRecord::where('school_id', $schoolId)
+                ->where('student_id', $student->student_id)
                 ->selectRaw('SUM(CASE WHEN status = "Present" THEN 1 ELSE 0 END) as total_attended, COUNT(*) as total_classes')
                 ->first();
-
+    
             $student->total_classes_attended = $attendanceData->total_attended ?? 0;
             $student->total_percentage = ($attendanceData->total_classes > 0)
                 ? ($attendanceData->total_attended / $attendanceData->total_classes) * 100
                 : 0;
         }
 
-        return view('attendance.index', [
+    
+        return view('attendance.upload', [
             'class' => $class,
             'students' => $students, // Pass student list to the view
             'statusCounts' => $statusCounts,
@@ -86,39 +193,68 @@ class AttendanceController extends Controller
         ]);
     }
 
+
     public function store(Request $request, $class)
     {
-        // Fetch the appropriate models for the class
-        $models = $this->getModel($class);
-        $attendanceModel = $models['attendance'];
+    
+                // Orodha ya madarasa yanayokubalika
+            $validClasses = [
+                'Standard_1', 'Standard_2', 'Standard_3', 'Standard_4', 
+                'Standard_5', 'Standard_6', 'Standard_7',
+                'Form_1', 'Form_2', 'Form_3', 'Form_4', 'Form_5', 'Form_6'
+            ];
 
-        // Validate the request
+            // Angalia kama darasa lililotumwa ni sahihi
+            if (!in_array($class, $validClasses)) {
+                abort(400, 'Invalid class selection.');
+            }
+
+        $school_id = Auth::user()->school_id;
+        if (!$school_id) {
+            logger('School ID is missing in session.');
+            abort(403, 'School ID not found.');
+        }
+
+        $date = $request->input('date'); // Pata tarehe kutoka kwenye form
+
+            if (!$date) {
+                return back()->with('error', 'Attendance date is required.');
+            }
+
+    
         $request->validate([
             'date' => 'required|date',
             'students' => 'required|array',
-            'students.*.number' => 'required|string',
             'students.*.status' => 'required|in:Present,Absent,Sick,Not Allowed',
         ]);
-
+    
         $data = $request->all();
-        $totalClasses = $attendanceModel::distinct()->count('attendance_date') + 1;
-
-        foreach ($data['students'] as $student) {
-            $existingRecord = $attendanceModel::where('student_number', $student['number'])
+        foreach ($data['students'] as $studentId => $student) {
+            $existingRecord = AttendanceRecord::where('student_id', $studentId)
                 ->where('attendance_date', $data['date'])
                 ->first();
-
-            $totalClassesAttended = $attendanceModel::where('student_number', $student['number'])
+    
+            // Kagua idadi ya total_classes (idadi ya siku ambazo mwanafunzi ameandikishwa mahudhurio, bila kujali status)
+            $totalClasses = AttendanceRecord::where('school_id', $school_id)
+                ->where('student_id', $studentId)
+                ->distinct()
+                ->count('attendance_date'); 
+    
+            // Hesabu total classes attended (siku ambazo mwanafunzi ameandikishwa kama Present)
+            $totalClassesAttended = AttendanceRecord::where('school_id', $school_id)
+                ->where('student_id', $studentId)
                 ->where('status', 'Present')
                 ->count();
-
-            if ($student['status'] == 'Present' && !$existingRecord) {
-                $totalClassesAttended += 1;
+    
+            // Ikiwa hakuna rekodi ya siku hiyo, tunahakikisha total_classes inaongezeka
+            if (!$existingRecord) {
+                $totalClasses += 1;
             }
-
-            $percentage = ($totalClasses > 0)
-                ? ($totalClassesAttended / $totalClasses) * 100
-                : 0;
+    
+            // Hesabu asilimia ya mahudhurio
+            $percentage = ($totalClasses > 0) ? ($totalClassesAttended / $totalClasses) * 100 : 0;
+    
+            $studentName = Students::where('student_id', $studentId)->value('student_name');
 
             if ($existingRecord) {
                 $existingRecord->update([
@@ -128,8 +264,11 @@ class AttendanceController extends Controller
                     'total_percentage' => $percentage,
                 ]);
             } else {
-                $attendanceModel::create([
-                    'student_number' => $student['number'],
+                AttendanceRecord::create([
+                    'school_id' => $school_id,
+                    'student_id' => $studentId,
+                    'student_name' => $studentName,
+                    'class' => $class,
                     'attendance_date' => $data['date'],
                     'status' => $student['status'],
                     'total_classes_attended' => $totalClassesAttended,
@@ -138,41 +277,71 @@ class AttendanceController extends Controller
                 ]);
             }
         }
+    
+                                // Tafuta idadi ya wanafunzi kwa kila status kwenye siku husika
+                $counts = AttendanceRecord::where('school_id', $school_id)
+                ->where('class', $class)
+                ->where('attendance_date', $date)
+                ->selectRaw("
+                    SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) as Present,
+                    SUM(CASE WHEN status = 'Absent' THEN 1 ELSE 0 END) as Absent,
+                    SUM(CASE WHEN status = 'Sick' THEN 1 ELSE 0 END) as Sick,
+                    SUM(CASE WHEN status = 'Not Allowed' THEN 1 ELSE 0 END) as `Not Allowed`
+                ")
+                ->first();
 
-        return redirect()->back()->with('success', 'Attendance saved successfully!');
+                // Tumia {} kwa keys zenye nafasi ili kuepuka error
+                $statusCounts = [
+                'Present' => $counts->Present ?? 0,
+                'Absent' => $counts->Absent ?? 0,
+                'Sick' => $counts->Sick ?? 0,
+                'Not Allowed' => $counts->{'Not Allowed'} ?? 0, // **Muhimu**
+                ];
+
+                return back()->with([
+                'success' => 'Attendance recorded successfully!',
+                'statusCounts' => $statusCounts,
+                'date' => $date
+                ]);
+
     }
 
+ public function getStudentAttendance($class, $student_id)
+ {
+     // Validate class input
+     if (!in_array($class, ['Standard_1', 'Standard_2', 'Standard_3', 'Standard_4', 
+        'Standard_5', 'Standard_6', 'Standard_7',
+        'Form_1', 'Form_2', 'Form_3', 'Form_4', 'Form_5', 'Form_6'])) 
+        {
+         return back()->with('error', 'Invalid class selected.');
+     }
+ 
+     // Fetch attendance data for the student
+     $attendanceData = AttendanceRecord::where('student_id', $student_id)
+            ->where('class', $class)
+            ->select('attendance_date', 'status')
+            ->get();
 
-    // app/Http/Controllers/AttendanceController.php
-public function getStudentAttendance($class, $student_number)
-{
-    // Validate the class
-    if (!in_array($class, ['Class_A', 'Class_B', 'Class_C'])) {
-        return response()->json(['error' => 'Invalid Class'], 404);
-    }
 
-    // Fetch the appropriate models for the class
-    $models = $this->getModel($class);
-    $attendanceModel = $models['attendance'];
+     // Calculate total attendance and percentage
+     $totalClasses = AttendanceRecord::where('class', $class)
+            ->distinct()
+            ->count('attendance_date');
 
-    // Fetch attendance data for the student
-    $attendanceData = $attendanceModel::where('student_number', $student_number)
-        ->select('attendance_date', 'status')
-        ->get();
 
-    // Calculate total attendance and percentage
-    $totalClasses = $attendanceModel::distinct()->count('attendance_date');
-    $totalAttended = $attendanceModel::where('student_number', $student_number)
-        ->where('status', 'Present')
-        ->count();
-    $percentage = ($totalClasses > 0) ? ($totalAttended / $totalClasses) * 100 : 0;
+     $totalAttended = AttendanceRecord::where('student_id', $student_id)
+            ->where('class', $class)
+            ->where('status', 'Present')
+            ->count();
 
-    return response()->json([
-        'student_number' => $student_number,
-        'attendance' => $attendanceData,
-        'total_classes' => $totalClasses,
-        'total_attended' => $totalAttended,
-        'percentage' => $percentage,
-    ]);
-}
+
+     $percentage = ($totalClasses > 0) ? ($totalAttended / $totalClasses) * 100 : 0;
+ 
+     // Return the view with data
+     return view('attendance.upload', compact('class', 'student_id', 'attendanceData', 'totalClasses', 'totalAttended', 'percentage'));
+ }
+ 
+
+
+
 }

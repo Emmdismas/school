@@ -47,7 +47,7 @@
 
     @foreach($names as $student)
         <tr>
-            <td>{{ $student->student_number }}</td>
+            <td>{{ $student->student_id }}</td>
             <td>{{ $student->student_name }}</td>
             <td><input type="number" name="marks[{{ $student->id }}][subject1]" class="form-control"></td>
             <td><input type="number" name="marks[{{ $student->id }}][subject2]" class="form-control"></td>

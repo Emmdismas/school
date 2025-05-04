@@ -16,15 +16,31 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('second_name');
             $table->string('last_name');
+            $table->unsignedBigInteger('school_id'); // Ongeza safu ya school_id
             $table->timestamps();
+
+            // Foreign key constraint kwa school_id
+            $table->foreign('school_id')
+                  ->references('school_id')
+                  ->on('schools')
+                  ->onDelete('cascade'); // Futa wanafunzi wote wa shule ikiwa shule imefutwa
         });
     }
 
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
+    public function down()
+{
+    if (Schema::hasTable('form_record')) {
+        Schema::table('form_record', function (Blueprint $table) {
+            if (Schema::hasColumn('form_record', 'school_id')) {
+                $table->dropForeign(['school_id']);
+            }
+        });
+
         Schema::dropIfExists('form_record');
     }
+}
+
 };

@@ -42,7 +42,7 @@ class AttendanceReportController extends Controller
     {
         $attendanceDetails = DB::table('attendance_table_class_a')
             ->where('attendance_date', $date)
-            ->select('student_number', 'student_name', 'status', 'total_classes_attended', 'total_percentage')
+            ->select('student_id', 'student_name', 'status', 'total_classes_attended', 'total_percentage')
             ->get();
 
         return view('attendance.detail', [
@@ -51,4 +51,10 @@ class AttendanceReportController extends Controller
             'attendanceDetails' => $attendanceDetails
         ]);
     }
+
+    public function __construct()
+{
+    $this->middleware('auth');
+}
+
 }

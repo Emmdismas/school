@@ -11,7 +11,7 @@ class StudentlistController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'student_number' => 'required|integer',
+            'student_id' => 'required|integer',
             'student_name' => 'required|string|max:255',
             'gender' => 'required|string',
             'date_of_birth' => 'required|date',
@@ -45,7 +45,7 @@ class StudentlistController extends Controller
 
         // Insert into the selected table
         $insert = DB::table($table)->insert([
-            'student_number' => $request->student_number,
+            'student_id' => $request->student_id,
             'student_name' => $request->student_name,
             'gender' => $request->gender,
             'date_of_birth' => $request->date_of_birth,
@@ -69,4 +69,22 @@ class StudentlistController extends Controller
 public function create (){
     return view('student_registration.register');
 }
+public function showProfile($id)
+{
+    $student = Students::findOrFail($id);
+    $class = strtolower($student->class);
+
+    // Update table names dynamically
+    $student->setTable("student_list_class_$class");
+    $student->attendance()->setTable("attendance_table_class_$class");
+    $student->homepackage()->setTable("homepackage_table_class_$class");
+    $student->homework()->setTable("homework_table_class_$class");
+    $student->writtenTests()->setTable("written_test_class_$class");
+    $student->examResults()->setTable("terminal_exam_results_class_$class");
+    $student->payment()->setTable("payment_record_class_$class");
+
+    return view('students.profile', compact('student'));
+}
+
+
 }

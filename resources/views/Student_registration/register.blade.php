@@ -1,89 +1,100 @@
- <!-- <div>
-   The only way to do great work is to love what you do. - Steve Jobs 
-</div>
--->
-<!-- resources/views/register.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Form</title>
-    <link rel="stylesheet" href="{{ asset('registration/css/styles.css') }}">
+    <title>Student Registration Form</title>
+    <link rel="stylesheet" href="{{ asset('assets/css/student_register.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
-    <h2>Student Registration Form</h2>
+    <div class="registration-container">
+        <h2>Student Registration Form</h2>
+        <form class="registration-form" action="{{ route('student.register')}}" method="post" enctype="multipart/form-data">
+            @csrf
+            <!-- Student Number -->
+            <label for="student_id">Student Number:</label>
+            <input type="text" id="student_id" name="student_id" required>
 
-    @if(session('success'))
-        <p>{{ session('success') }}</p>
-    @endif
+            <!-- Student Name -->
+            <label for="student_name">Student Name:</label>
+            <input type="text" id="student_name" name="student_name" required>
 
-    <form action="{{ route('student.register') }}" method="post" enctype="multipart/form-data">
-        @csrf
-        <label for="student_number">Student Number:</label>
-        <input type="text" name="student_number" required><br>
+            <!-- Gender -->
+            <label for="gender">Gender:</label>
+            <select id="gender" name="gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
 
-        <label for="student_name">Student Name:</label>
-        <input type="text" name="student_name" required><br>
+            <!-- Date of Birth -->
+            <label for="date_of_birth">Date of Birth:</label>
+            <input type="date" id="date_of_birth" name="date_of_birth" required>
 
-        <label for="gender">Gender:</label>
-        <select name="gender">
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-        </select><br>
+            <!-- Blood Group -->
+            <label for="blood_group">Blood Group:</label>
+            <input type="text" id="blood_group" name="blood_group" required>
 
-        <label for="date_of_birth">Date of Birth:</label>
-        <input type="date" name="date_of_birth" required><br>
+            <!-- Parent Name -->
+            <label for="parent_name">Parent Name:</label>
+            <input type="text" id="parent_name" name="parent_name" required>
 
-        <label for="blood_group">Blood Group:</label>
-        <input type="text" name="blood_group" required><br>
+            <!-- Parent Number -->
+            <label for="parent_number">Parent Number:</label>
+            <input type="text" id="parent_number" name="parent_number" required>
 
-        <label for="parent_name">Parent Name:</label>
-        <input type="text" name="parent_name" required><br>
+            <!-- Parent Email -->
+            <label for="parent_email">Parent Email:</label>
+            <input type="email" id="parent_email" name="parent_email" required>
 
-        <label for="parent_number">Parent Number:</label>
-        <input type="text" name="parent_number" required><br>
+            <!-- Relationship -->
+            <label for="relationship">Relationship:</label>
+            <input type="text" id="relationship" name="relationship" required>
 
-        <label for="parent_email">Parent Email:</label>
-        <input type="email" name="parent_email" required><br>
+            <!-- Class -->
+            <label for="class">Select Class:</label>
+            <select name="class" id="class" required>
+                <optgroup label="Primary School">
+                    <option value="Standard_1">Standard 1</option>
+                    <option value="Standard_2">Standard 2</option>
+                    <option value="Standard_3">Standard 3</option>
+                    <option value="Standard_4">Standard 4</option>
+                    <option value="Standard_5">Standard 5</option>
+                    <option value="Standard_6">Standard 6</option>
+                    <option value="Standard_7">Standard 7</option>
+                </optgroup>
+                <optgroup label="Secondary School">
+                    <option value="Form_1">Form 1</option>
+                    <option value="Form_2">Form 2</option>
+                    <option value="Form_3">Form 3</option>
+                    <option value="Form_4">Form 4</option>
+                    <option value="Form_5">Form 5</option>
+                    <option value="Form_6">Form 6</option>
+                </optgroup>
+            </select>
 
-        <label for="relationship">Relationship:</label>
-        <input type="text" name="relationship" required><br>
+            <!-- Upload Photo -->
+            <label for="photo">Upload Photo:</label>
+            <input type="file" id="photo" name="photo" accept="image/*" required>
 
-        <label for="class">Class:</label>
-        <select name="class" required>
-            <option value="A">Class A</option>
-            <option value="B">Class B</option>
-            <option value="C">Class C</option>
-        </select><br>
-
-        <label for="photo">Upload Photo:</label>
-        <input type="file" name="photo" accept="image/*" required><br>
-
-        <button type="submit">Register</button>
-    </form>
-    <script src="{{ asset('registration/js/scripts.js') }}"></script>
-
-    @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
+            <!-- Register Button -->
+            <button type="submit">Register</button>
+        </form>
     </div>
-@endif
 
-@if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
+    <!-- JavaScript for pop-up -->
+    @if(session('error'))
+    <script type="text/javascript">
+        var isConfirmed = confirm("{{ session('error') }}");
 
-@if (session('error'))
-    <div class="alert alert-danger">
-        {{ session('error') }}
-    </div>
+        if (isConfirmed) {
+            // Redirect to the edit page for the student
+            window.location.href = "/students/edit/{{ session('student_id') }}";
+        } else {
+            // Do nothing (remain on the current form)
+            window.location.href = "/students/create";
+        }
+    </script>
 @endif
 
 </body>

@@ -27,8 +27,8 @@ def webhook():
     send_whatsapp_message(sender, response)
     return jsonify({"status": "success"})
 
-def get_student_marks(student_number):
-    response = requests.get(f"{LARAVEL_API_URL}/marks/Class_A/{student_number}")
+def get_student_marks(student_id):
+    response = requests.get(f"{LARAVEL_API_URL}/marks/Class_A/{student_id}")
     if response.status_code == 200:
         data = response.json()
         marks_summary = "Matokeo ya mwanako:\n"
@@ -42,8 +42,8 @@ def get_student_marks(student_number):
     else:
         return "Samahani, matokeo hayawezi kupatikana kwa sasa."
 
-def get_student_payments(student_number):
-    response = requests.get(f"{LARAVEL_API_URL}/payments/Class_A/{student_number}")
+def get_student_payments(student_id):
+    response = requests.get(f"{LARAVEL_API_URL}/payments/Class_A/{student_id}")
     if response.status_code == 200:
         data = response.json()
         payments_summary = "Malipo ya mwanako:\n"
@@ -66,15 +66,15 @@ def send_whatsapp_message(to, message):
     response = requests.post(WHATSAPP_API_URL, headers=headers, json=payload)
     return response.json()
 
-    def get_full_report(student_number):
-    response = requests.get(f"{LARAVEL_API_URL}/student/full-report/Class_A/{student_number}")
+    def get_full_report(student_id):
+    response = requests.get(f"{LARAVEL_API_URL}/student/full-report/Class_A/{student_id}")
     if response.status_code == 200:
         data = response.json()
         report_summary = "Taarifa Kamili za Mwanafunzi:\n\n"
         
         # Student Details
         report_summary += "Taarifa za Msingi:\n"
-        report_summary += f"- Namba ya Mwanafunzi: {data['student_details']['student_number']}\n"
+        report_summary += f"- Namba ya Mwanafunzi: {data['student_details']['student_id']}\n"
         report_summary += f"- Jina la Mwanafunzi: {data['student_details']['student_name']}\n"
         report_summary += f"- Jinsia: {data['student_details']['gender']}\n"
         report_summary += f"- Tarehe ya Kuzaliwa: {data['student_details']['date_of_birth']}\n"

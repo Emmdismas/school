@@ -10,11 +10,24 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, $role)
     {
-        if (Auth::check() && Auth::user()->role === $role) {
-            return $next($request);
+        // Hakikisha kwamba $role ipo
+        if (empty($role)) {
+            return redirect('/login')->with('error', 'Role parameter is missing.');
         }
 
-        // Rudisha user kwa login au ukurasa wa error
-        return redirect('/login')->withErrors(['unauthorized' => 'You do not have permission to access this page.']);
+        // Hakikisha mtumiaji ame-login
+        if (!Auth::check()) {
+            return redirect('/login')->with('error', 'You must be logged in.');
+        }
+
+        // Pata role ya mtumiaji kutoka database
+        $user = Auth::user();
+
+        // Angalia kama role ya mtumiaji inalingana na role inayohitajika
+        if ($user->role !== $role) {
+            return redirect('/')->with('error', 'Access denied.');
+        }
+
+        return $next($request);
     }
 }

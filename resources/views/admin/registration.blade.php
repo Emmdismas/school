@@ -13,9 +13,14 @@
         </header>
         <form action="{{ route('admin.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
             <div class="form-group">
                 <label for="school-name">School Name:</label>
                 <input type="text" id="school-name" name="school_name" placeholder="Enter school name" required>
+            </div>
+            <div class="form-group">
+                <label for="school-id">School ID:</label>
+                <input type="number" id="school-id" name="school_id" placeholder="Enter school id" required>
             </div>
 
             <div class="form-group">

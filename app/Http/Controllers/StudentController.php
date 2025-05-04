@@ -2,105 +2,140 @@
 
 namespace App\Http\Controllers;
 
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\StudentListClassA;
-use App\Models\StudentListClassB;
-use App\Models\StudentListClassC;
-
-
+use App\Models\Students;
+use App\Models\AttendanceRecord;
+use App\Models\PaymentRecords;
 
 class StudentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-           // Method to display the list of students
-    public function index()
+    public function index(Request $request)
     {
-        $class = $request->route('class'); // Get class from request
-
-        if (!in_array($class, ['Class A', 'Class B', 'Class C'])) {
-            abort(404);
+        $class = $request->route('class');
+        $schoolId = Auth::user()->school_id;
+    
+        // Validate class parameter
+        $validClasses = [
+            'Standard_1', 'Standard_2', 'Standard_3', 'Standard_4',
+            'Standard_5', 'Standard_6', 'Standard_7',
+            'Form_1', 'Form_2', 'Form_3', 'Form_4', 'Form_5', 'Form_6'
+        ];
+    
+        if (!in_array($class, $validClasses)) {
+            abort(404, 'Invalid class specified');
         }
-
-        $students = match ($class) {
-            'Class A' => StudentListClassA::all(),
-            'Class B' => StudentListClassB::all(),
-            'Class C' => StudentListClassC::all(),
-            default => collect(),
-        };
-
-        $students = Student::all();
-
-        return view('student.index', compact('class', 'students')); // Send students and class to the view
-
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(Request $request)
-    {
-        $class = $request->route('class'); // Get class from request
-
-        if (!in_array($class, ['Class A', 'Class B', 'Class C'])) {
-            abort(404);
-        }
-
-        $students = match ($class) {
-            'Class A' => StudentListClassA::all(),
-            'Class B' => StudentListClassB::all(),
-            'Class C' => StudentListClassC::all(),
-            default => collect(),
-        };
-
-        return view('student.index', compact('class', 'students')); // Send students and class to the view
-    }
-
-
-    /**
-     * Store a newly created resource in storage.
-     */
-         // Method to handle the form submission and add a new student
-    public function store(Request $request)
-    {
-        $request->validate([
-            'student_number' => 'required|integer',
-            'student_name' => 'required|string|max:255',
-            'gender' => 'required|string',
-            'date_of_birth' => 'required|date',
-            'blood_group' => 'required|string',
-            'parent_name' => 'required|string|max:255',
-            'parent_number' => 'required|integer',
-            'parent_email' => 'required|email',
-            'relationship' => 'required|string|max:100',
-            'class' => 'required|string|in:A,B,C',
-            'photo' => 'required|image|mimes:jpg,jpeg,png|max:2048', // 2MB limit
+    
+        // Get students for the specified class
+        $students = Students::where('school_id', $schoolId)
+                    ->where('class', $class)
+                    ->orderBy('student_name')
+                    ->get();
+    
+        return view('student.index', [
+            'class' => $class,
+            'students' => $students
         ]);
-
-        // Handle file upload
-        if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('students', 'public');
-        }
-
-        // Dynamic table selection
-        $table = 'student_list_class_' . strtolower($request->class);
-
-        // Validation logic here
-
-    // Handle storing the student in the correct class table
-    if ($request->class == 'A') {
-        // Save to Student_list_class_A table
-    } elseif ($request->class == 'B') {
-        // Save to Student_list_class_B table
-    } elseif ($request->class == 'C') {
-        // Save to Student_list_class_C table
     }
 
-        // Insert into the selected table
-        $insert = DB::table($table)->insert([
-            'student_number' => $request->student_number,
+    public function create(Request $request)
+{
+    $class = $request->route('class');
+    
+    // Validate class parameter
+    $validClasses = [
+        'Standard_1', 'Standard_2', 'Standard_3', 'Standard_4',
+        'Standard_5', 'Standard_6', 'Standard_7',
+        'Form_1', 'Form_2', 'Form_3', 'Form_4', 'Form_5', 'Form_6'
+    ];
+
+    if (!in_array($class, $validClasses)) {
+        abort(404, 'Invalid class specified');
+    }
+
+    return view('student.create', [
+        'class' => $class
+    ]);
+}
+
+public function store(Request $request)
+{
+    $validClasses = [
+        'Standard_1', 'Standard_2', 'Standard_3', 'Standard_4', 
+        'Standard_5', 'Standard_6', 'Standard_7',
+        'Form_1', 'Form_2', 'Form_3', 'Form_4', 'Form_5', 'Form_6'
+    ];
+
+    $request->validate([
+        'student_id' => 'required|integer',
+        'student_name' => 'required|string|max:255',
+        'gender' => 'required|string',
+        'date_of_birth' => 'required|date',
+        'blood_group' => 'required|string',
+        'parent_name' => 'required|string|max:255',
+        'parent_number' => 'required|integer',
+        'parent_email' => 'required|email',
+        'relationship' => 'required|string|max:100',
+        'class' => 'required|string|in:' . implode(',', $validClasses),
+        'photo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+    
+    $school_id = Auth::user()->school_id;
+
+
+    // Handle photo upload
+ // Handle photo upload
+if ($request->hasFile('photo')) {
+    try {
+        $photo = $request->file('photo');
+        $photoPath = $photo->getRealPath();
+        
+        // Read binary data safely
+        $photoBinary = file_get_contents($photoPath);
+        if ($photoBinary === false) {
+            throw new \Exception('Could not read photo file');
+        }
+        
+        // Optional: Validate binary data
+        if (!mb_check_encoding($photoBinary, 'UTF-8')) {
+            $photoBinary = mb_convert_encoding($photoBinary, 'UTF-8');
+        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Photo processing failed: ' . $e->getMessage()
+        ], 400);
+    }
+} else {
+    return response()->json([
+        'success' => false,
+        'message' => 'Photo is required'
+    ], 400);
+}
+
+    // Check if student already exists
+    $existingStudent = Students::where('student_id', $request->student_id)
+                        ->where('school_id', $school_id)
+                        ->where('class', $request->class)
+                        ->first();
+
+    if ($existingStudent) {
+        // Show a pop-up with option to modify data or not
+        return redirect()->route('register.create')->with([
+            'error' => 'This student is already registered. Do you want to modify the student data?',
+            'student_id' => $request->student_id,
+            'student_name' => $request->student_name,
+        ]);
+    }
+
+    // Create new student record
+    else{
+        Students::create([
+            'school_id' => $school_id,
+            'student_id' => $request->student_id,
+            'class' => $request->class,
             'student_name' => $request->student_name,
             'gender' => $request->gender,
             'date_of_birth' => $request->date_of_birth,
@@ -109,129 +144,184 @@ class StudentController extends Controller
             'parent_number' => $request->parent_number,
             'parent_email' => $request->parent_email,
             'relationship' => $request->relationship,
-            'photo_path' => $photoPath,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'photo' => $photoBinary,
+            'year_of_study' => date('Y'), // ✅ Inajaza mwaka wa sasa
+            'status' => 'Active',
         ]);
-
-        if ($insert) {
-            return redirect()->back()->with('success', 'Student Registered Successfully!');
-        } else {
-            return redirect()->back()->with('error', 'Registration Failed! Try Again.');
-        }
-
+        return redirect()->route('register.create')->with('success', 'Student Registered Successfully!');
+} 
 }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
-
-    // app/Http/Controllers/StudentController.php
-public function getFullReport($class, $student_number)
+public function edit($student_id)
 {
-    // Validate class
-    if (!in_array($class, ['Class_A', 'Class_B', 'Class_C'])) {
-        return response()->json(['error' => 'Invalid Class'], 404);
-    }
-
-    // Fetch student details
-    $student = match ($class) {
-        'Class_A' => StudentListClassA::where('student_number', $student_number)->first(),
-        'Class_B' => StudentListClassB::where('student_number', $student_number)->first(),
-        'Class_C' => StudentListClassC::where('student_number', $student_number)->first(),
-        default => null,
-    };
+    // Tafuta mwanafunzi kwa student_id badala ya id
+    $student = Students::where('student_id', $student_id)->first();
 
     if (!$student) {
-        return response()->json(['error' => 'Student not found'], 404);
+        return redirect()->route('register.create')->with('error', 'Student not found.');
     }
 
-    // Fetch student marks
-    $marksTable = match ($class) {
-        'Class_A' => 'midterm_test_results_class_a',
-        'Class_B' => 'midterm_test_results_class_b',
-        'Class_C' => 'midterm_test_results_class_c',
-        default => null,
-    };
+    return view('student.edit', compact('student'));
+}
 
-    $marks = DB::table($marksTable)
-        ->where('student_number', $student_number)
-        ->first();
 
-    // Fetch student payments
-    $paymentsTable = match ($class) {
-        'Class_A' => 'payment_record_class_a',
-        'Class_B' => 'payment_record_class_b',
-        'Class_C' => 'payment_record_class_c',
-        default => null,
-    };
+public function update(Request $request, $student_id)
+{
+    // Tafuta mwanafunzi kwa student_id
+    $student = Students::where('student_id', $student_id)->first();
 
-    $payments = DB::table($paymentsTable)
-        ->where('student_number', $student_number)
-        ->get();
+    if (!$student) {
+        return redirect()->route('students.create')->with('error', 'Student not found.');
+    }
 
-    // Prepare full report
-    $fullReport = [
-        'student_details' => [
-            'student_number' => $student->student_number,
-            'student_name' => $student->student_name,
-            'gender' => $student->gender,
-            'date_of_birth' => $student->date_of_birth,
-            'blood_group' => $student->blood_group,
-            'parent_name' => $student->parent_name,
-            'parent_number' => $student->parent_number,
-            'parent_email' => $student->parent_email,
-            'relationship' => $student->relationship,
-            'photo_path' => $student->photo_path,
-        ],
-        'marks' => $marks ? [
-            'subject_1' => $marks->subject_1,
-            'subject_2' => $marks->subject_2,
-            'subject_3' => $marks->subject_3,
-            'subject_4' => $marks->subject_4,
-            'subject_5' => $marks->subject_5,
-            'total_marks' => $marks->total_marks,
-            'average_marks' => $marks->average_marks,
-            'position' => $marks->student_position,
-        ] : null,
-        'payments' => $payments->map(function ($payment) {
-            return [
-                'payment_type' => $payment->payment_type,
-                'amount' => $payment->amount,
-                'receipt_content' => $payment->receipt_content,
-            ];
-        }),
+    // Validate input
+    $request->validate([
+        'student_name' => 'nullable|string|max:255',
+        'blood_group' => 'nullable|string',
+        'gender' => 'nullable|string',
+        'date_of_birth' => 'nullable|date',
+        'parent_name' => 'nullable|string|max:255',
+        'parent_number' => 'nullable|numeric',
+        'parent_email' => 'nullable|email',
+        'relationship' => 'nullable|string|max:255',
+        'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max for image
+    ]);
+
+    // Handle photo upload
+    if ($request->hasFile('photo')) {
+        // Get the uploaded photo
+        $photo = $request->file('photo');
+         // Set exact width and height
+
+        // Convert image to binary data (jpeg format)
+        $photoBinary = (string) $image->encode('jpeg'); // Encode the image as JPEG
+    } else {
+        $photoBinary = $student->photo;  // Retain old photo if no new photo is uploaded
+    }
+
+    // Update student data including photo if provided
+    $student->update([
+        'student_name' => $request->student_name ?: $student->student_name,
+        'blood_group' => $request->blood_group ?: $student->blood_group,
+        'gender' => $request->gender ?: $student->gender,
+        'date_of_birth' => $request->date_of_birth ?: $student->date_of_birth,
+        'parent_name' => $request->parent_name ?: $student->parent_name,
+        'parent_number' => $request->parent_number ?: $student->parent_number,
+        'parent_email' => $request->parent_email ?: $student->parent_email,
+        'relationship' => $request->relationship ?: $student->relationship,
+        'photo' => $photoBinary,  // Store the resized photo as binary data
+    ]);
+
+    return redirect()->route('students.show', $student_id)->with('success', 'Student data updated successfully!');
+}
+
+
+public function fullProfile($student_id, $school_id)
+{
+    // Fetch the student based on student_id and school_id
+    $student = Students::where('student_id', $student_id)
+                        ->where('school_id', $school_id)
+                        ->first();
+
+    if (!$student) {
+        return redirect()->route('students.index')->with('error', 'Student not found.');
+    }
+
+    // Ensure student photo is available
+    if ($student->photo) {
+        $student->photo_path = base64_encode($student->photo); // Encoding photo as base64
+    }
+
+    // Fetch attendance and payment data as per your requirement
+    $attendances = AttendanceRecord::where('student_id', $student_id)->where('school_id', $school_id)->get();
+    $payments = PaymentRecords::where('student_id', $student_id)->where('school_id', $school_id)->get();
+
+    return view('student.full_profile', compact('student', 'attendances', 'payments'));
+}
+
+
+public function show($student_id)
+{
+    $student = Students::where('student_id', $student_id)->first();
+
+    if (!$student) {
+        return redirect()->route('students.index')->with('error', 'Student not found.');
+    }
+
+    // Convert the binary photo data into a base64 string for displaying
+    $student->photo_base64 = base64_encode($student->photo);
+
+    return view('student.full_profile', compact('student'));
+}
+
+
+    
+    public function generatePDF($student_id)
+    {
+        $schoolId = Auth::user()->school_id;
+        $student = Students::where('student_id', $student_id)->where('school_id', $schoolId)->firstOrFail();
+        $pdf = Pdf::loadView('student.pdf', compact('student'));
+        return $pdf->download('student_profile_' . $student->student_id . '.pdf');
+    }
+
+   
+/**
+ * Function ya kubadili darasa
+ */
+public function updateClassYear()
+{
+    $currentYear = date('Y');
+
+    // Pata wanafunzi wote ambao wanahitaji kubadilisha darasa
+    $students = Students::where('graduated', false)
+                        ->where('year_of_study', '<', $currentYear)
+                        ->get();
+
+    foreach ($students as $student) {
+        // Angalia kama mwanafunzi anapaswa kuhitimu
+        if (in_array($student->class, ['Standard 7', 'Form 4', 'Form 6'])) {
+            $student->class = 'Graduated';
+            $student->graduated = true; // Wamehitimu
+            $student->graduation_year = $currentYear; // Hifadhi mwaka wa kuhitimu
+            $student->status = 'Graduated'; // Update status
+        } else {
+            // Wanafunzi wanapanda darasa
+            $student->class = $this->getNextClass($student->class);
+            $student->status = 'Active'; // Wanafunzi waliopo bado wako active
+        }
+
+        // Update mwaka wa masomo
+        $student->year_of_study = $currentYear;
+        $student->save();
+    }
+
+    return redirect()->route('students.index')->with('success', 'Students promoted or graduated successfully.');
+}
+
+/**
+ * Function ya kubadili darasa
+ */
+private function getNextClass($currentClass)
+{
+    $classes = [
+        'Standard 1' => 'Standard 2',
+        'Standard 2' => 'Standard 3',
+        'Standard 3' => 'Standard 4',
+        'Standard 4' => 'Standard 5',
+        'Standard 5' => 'Standard 6',
+        'Standard 6' => 'Standard 7',
+        'Standard 7' => 'Graduated', // Wanafunzi wa Standard 7 wanahitimu
+        'Form 1' => 'Form 2',
+        'Form 2' => 'Form 3',
+        'Form 3' => 'Form 4',
+        'Form 4' => 'Graduated', // Wanafunzi wa Form 4 wanahitimu
+        'Form 5' => 'Form 6',
+        'Form 6' => 'Graduated', // Wanafunzi wa Form 6 wanahitimu
     ];
 
-    return response()->json($fullReport);
+    return $classes[$currentClass] ?? $currentClass;
 }
+
+
 }
