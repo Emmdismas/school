@@ -22,26 +22,19 @@ return new class extends Migration {
             $table->integer('subject_4');
             $table->integer('subject_5');
             $table->integer('total_marks')->storedAs('subject_1 + subject_2 + subject_3 + subject_4 + subject_5');
-            $table->decimal('average_marks', 5, 2)->storedAs('total_marks / 5');
+            $table->decimal('average_marks', 5, 2)->storedAs('(subject_1 + subject_2 + subject_3 + subject_4 + subject_5) / 5'); // FIXED: Direct calculation
             $table->integer('student_position')->nullable();
             $table->timestamps();
 
-
-            // Foreign key constraint kwa school_id
             $table->foreign('school_id')
                   ->references('school_id')
                   ->on('schools')
-                  ->onDelete('cascade'); // Futa wanafunzi wote wa shule ikiwa shule imefutwa
-        
+                  ->onDelete('cascade');
         });
     }
 
     public function down()
     {
-       
-    
-            Schema::dropIfExists('exam_results');
-        }
-    
-    
+        Schema::dropIfExists('exam_results');
+    }
 };
