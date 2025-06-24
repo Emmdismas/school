@@ -17,8 +17,11 @@ return new class extends Migration
             $table->unsignedBigInteger('student_id');
             $table->string('student_name');
             $table->string('class'); 
+            $table->string('academic_year', 10);
             $table->string('payment_type');
-            $table->integer('amount');
+            $table->integer('amount_paid');
+            $table->integer('total_paid');
+            $table->integer('total_percentage');
             $table->binary('receipt_content')->nullable(); // Hifadhi receipt kama longBlob
             $table->string('receipt_filename')->nullable(); // Hifadhi jina la receipt
             $table->timestamps();

@@ -5,12 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ExamResult extends Model  
-
+class ExamResult extends Model
 {
     use HasFactory;
-
-    protected $table = 'exam_results';
 
     protected $fillable = [
         'school_id',
@@ -20,21 +17,18 @@ class ExamResult extends Model
         'month',
         'student_id',
         'student_name',
-        'subject_1',
-        'subject_2',
-        'subject_3',
-        'subject_4',
-        'subject_5',
+        'total_marks',
+        'average_marks',
         'student_position',
     ];
-    // Set table dynamically
-    public function setTableName($class, $examType)
+
+    public function subjectMarks()
     {
-        $this->table = strtolower("{$class}_{$examType}_results");
+        return $this->hasMany(SubjectMark::class);
     }
-     // Uhusiano na meza ya schools
-     public function school()
-     {
-         return $this->belongsTo(School::class, 'school_id');
-     }
+
+    public function school()
+    {
+        return $this->belongsTo(School::class, 'school_id', 'school_id');
+    }
 }

@@ -23,6 +23,17 @@ header h2 {
     color: #4154f1;
     margin-bottom: 20px;
 }
+/* Header styling */
+ h2 {
+    text-align: center;
+    
+    color: #4154f1;
+    margin-bottom: 20px;
+}
+ h3 {
+    
+    color: #259925;
+}
 
 /* Form styles */
 form {

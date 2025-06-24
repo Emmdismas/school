@@ -13,32 +13,36 @@
     <div class="container">
         <h2>Payment Records for {{ $class }}</h2>
         <table>
-            <thead>
-                <tr>
-                    <th>Student ID</th>
-                    <th>Stud Name</th>
-                    <th>Payment Type</th>
-                    <th>Amount (Tsh)</th>
-                    <th>Receipt</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($payments as $payment)
-                    <tr>
-                        <td>{{ $payment->student_id }}</td>
-                        <td>{{ $payment->student_name }}</td>
-                        <td>{{ $payment->payment_type }}</td>
-                        <td>${{ $payment->amount }}</td>
-                        <td>
-                            @if($payment->receipt_content)
-                                <a href="{{ route('payment.download', ['class' => $class, 'id' => $payment->id]) }}" class="btn">Download</a>
-                            @else
-                                N/A
-                            @endif
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
+            <<thead>
+    <tr>
+        <th>Student ID</th>
+        <th>Student Name</th>
+        <th>Payment Type</th>
+        <th>Total Paid (Tsh)</th>
+        <th>Remained (Tsh)</th>
+        <th>Total %</th>
+        
+    </tr>
+</thead>
+<tbody>
+    @foreach ($payments as $payment)
+        @php
+            $totalPaid = (int)$payment->total_paid;
+            $percentage = round(($totalPaid / $totalFee) * 100, 1);
+            $remained = max($totalFee - $totalPaid, 0);
+        @endphp
+        <tr>
+            <td>{{ $payment->student_id }}</td>
+            <td>{{ $payment->student_name }}</td>
+            <td>{{ $payment->payment_type }}</td>
+            <td>{{ number_format($totalPaid) }}</td>
+            <td>{{ number_format($remained) }}</td>
+            <td>{{ $percentage }}%</td>
+            
+        </tr>
+    @endforeach
+</tbody>
+
         </table>
     </div>
 </body>

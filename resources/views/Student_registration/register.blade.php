@@ -6,6 +6,7 @@
     <title>Student Registration Form</title>
     <link rel="stylesheet" href="{{ asset('assets/css/student_register.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div class="registration-container">
@@ -51,28 +52,39 @@
             <label for="relationship">Relationship:</label>
             <input type="text" id="relationship" name="relationship" required>
 
-            <!-- Class -->
+            <!-- Class Selection -->
             <label for="class">Select Class:</label>
             <select name="class" id="class" required>
-                <optgroup label="Primary School">
-                    <option value="Standard_1">Standard 1</option>
-                    <option value="Standard_2">Standard 2</option>
-                    <option value="Standard_3">Standard 3</option>
-                    <option value="Standard_4">Standard 4</option>
-                    <option value="Standard_5">Standard 5</option>
-                    <option value="Standard_6">Standard 6</option>
-                    <option value="Standard_7">Standard 7</option>
-                </optgroup>
-                <optgroup label="Secondary School">
-                    <option value="Form_1">Form 1</option>
-                    <option value="Form_2">Form 2</option>
-                    <option value="Form_3">Form 3</option>
-                    <option value="Form_4">Form 4</option>
-                    <option value="Form_5">Form 5</option>
-                    <option value="Form_6">Form 6</option>
-                </optgroup>
+                <!-- Options will be populated by JavaScript based on school type -->
             </select>
 
+            <!-- Stream Selection (for Form 3-6 only) -->
+            <div id="stream-section" style="display: none;">
+                <label for="stream">Select Stream:</label>
+                <select name="stream" id="stream">
+                    <option value="">-- Select Stream --</option>
+                    <option value="science">Science</option>
+                    <option value="arts">Arts</option>
+                    <option value="business">Business</option>
+                </select>
+            </div>
+
+             <div class="form-group">
+                <label for="name">Username:</label>
+                <input type="text" id="name" name="name" placeholder="Enter your name" required>
+            </div>
+
+          <div class="form-group">
+                <label for="password">Student Password:</label>
+                <input type="password" id="password" name="password" required>
+                <div id="password-message" style="color: red; font-weight: bold;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password_confirmation">Confirm Password:</label>
+                <input type="password" id="password_confirmation" name="password_confirmation" required>
+                <div id="confirm-message" style="color: red; font-weight: bold;"></div>
+            </div>
             <!-- Upload Photo -->
             <label for="photo">Upload Photo:</label>
             <input type="file" id="photo" name="photo" accept="image/*" required>
@@ -82,20 +94,49 @@
         </form>
     </div>
 
-    <!-- JavaScript for pop-up -->
-    @if(session('error'))
-    <script type="text/javascript">
-        var isConfirmed = confirm("{{ session('error') }}");
 
-        if (isConfirmed) {
-            // Redirect to the edit page for the student
-            window.location.href = "/students/edit/{{ session('student_id') }}";
-        } else {
-            // Do nothing (remain on the current form)
-            window.location.href = "/students/create";
+   <script>
+    $(document).ready(function() {
+        const schoolType = "{{ $schoolType }}";
+
+        const classSelect = $('#class');
+        classSelect.empty();
+
+        if (schoolType === 'primary') {
+            for (let i = 1; i <= 7; i++) {
+                classSelect.append(`<option value="Standard_${i}">Standard ${i}</option>`);
+            }
+        } else if (schoolType === 'secondary' || schoolType === 'advance') {
+            for (let i = 1; i <= 4; i++) {
+                classSelect.append(`<option value="Form_${i}">Form ${i}</option>`);
+            }
+            if (schoolType === 'advance') {
+                for (let i = 5; i <= 6; i++) {
+                    classSelect.append(`<option value="Form_${i}">Form ${i}</option>`);
+                }
+            }
         }
-    </script>
-@endif
-
+        
+        // Trigger change event to show/hide stream section
+        $('#class').trigger('change');
+        
+        $('#class').change(function() {
+            const selectedClass = $(this).val();
+            if (selectedClass.startsWith('Form_')) {
+                const formNumber = parseInt(selectedClass.split('_')[1]);
+                if (formNumber >= 3) {
+                    $('#stream-section').show();
+                    $('#stream').prop('required', true);
+                } else {
+                    $('#stream-section').hide();
+                    $('#stream').prop('required', false);
+                }
+            } else {
+                $('#stream-section').hide();
+                $('#stream').prop('required', false);
+            }
+        });
+    });
+</script>
 </body>
 </html>

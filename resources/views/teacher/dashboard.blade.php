@@ -302,88 +302,62 @@
         </a>
 </li>
 
+<!-- VIEW STUDENTS -->
 <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#students-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-people"></i><span>Students</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
     <ul id="students-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        
-        <!-- PRIMARY SCHOOL SECTION -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#primary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Primary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="primary-nav" class="nav-content collapse">
-                @foreach(range(1, 7) as $level)
-                <li>
-                    <a href="{{ route('student.index', ['class' => 'Standard_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Standard {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
-        </li>
-        
-        <!-- SECONDARY SCHOOL SECTION -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#secondary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Secondary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="secondary-nav" class="nav-content collapse">
-                @foreach(range(1, 6) as $level)
-                <li>
-                    <a href="{{ route('student.index', ['class' => 'Form_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
-        </li>
-        
-    </ul>
-</li>  <!-- End Components Nav -->
+          @php
+     $user = \App\Helpers\UserHelper::getLoggedInUser();
+    $teacherClasses = is_array($user?->classes) ? $user->classes : json_decode($user?->classes, true);
+@endphp
 
-    <!-- CALL ATTENDANCE SECTION -->
+@if(!empty($teacherClasses))
+    @foreach($teacherClasses as $class)
+        <li>
+            <a href="{{ route('student.index', ['class' => str_replace(' ', '_', $class)]) }}">
+                <i class="bi bi-circle"></i><span>{{ $class }}</span>
+            </a>
+        </li>
+    @endforeach
+@else
+    <li>
+        <span class="text-muted ps-4">No assigned classes</span>
+    </li>
+@endif
+    </ul>
+</li>
+
+<!-- CALL ATTENDANCE SECTION -->
 <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#call-attendance-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-journal-text"></i><span>Call Attendance</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
     <ul id="call-attendance-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        
-        <!-- PRIMARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#call-primary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Primary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="call-primary-nav" class="nav-content collapse">
-                @foreach(range(1, 7) as $level)
-                <li>
-                    <a href="{{ route('attendance.index', ['class' => 'Standard_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Standard {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
-        </li>
 
-        <!-- SECONDARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#call-secondary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Secondary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="call-secondary-nav" class="nav-content collapse">
-                @foreach(range(1, 6) as $level)
+        @php
+            $user = \App\Helpers\UserHelper::getLoggedInUser();
+            $teacherClasses = is_array($user?->classes) ? $user->classes : json_decode($user?->classes, true);
+        @endphp
+
+        @if(!empty($teacherClasses))
+            @foreach($teacherClasses as $class)
                 <li>
-                    <a href="{{ route('attendance.index', ['class' => 'Form_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
+                    <a href="{{ route('attendance.index', ['class' => str_replace(' ', '_', $class)]) }}">
+                        <i class="bi bi-circle"></i><span>{{ $class }}</span>
                     </a>
                 </li>
-                @endforeach
-            </ul>
-        </li>
+            @endforeach
+        @else
+            <li>
+                <span class="text-muted ps-4">No assigned classes</span>
+            </li>
+        @endif
 
     </ul>
 </li>
+
 
 <!-- ATTENDANCE RECORDS SECTION -->
 <li class="nav-item">
@@ -391,169 +365,110 @@
         <i class="bi bi-journal-text"></i><span>Attendance Records</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
     <ul id="attendance-records-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        
-        <!-- PRIMARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#records-primary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Primary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="records-primary-nav" class="nav-content collapse">
-                @foreach(range(1, 7) as $level)
-                <li>
-                    <a href="{{ route('attendance.summary', ['class' => 'Standard_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Standard {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
-        </li>
+         @php
+     $user = \App\Helpers\UserHelper::getLoggedInUser();
+    $teacherClasses = is_array($user?->classes) ? $user->classes : json_decode($user?->classes, true);
+@endphp
 
-        <!-- SECONDARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#records-secondary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Secondary School</span><i class="bi bi-chevron-down ms-auto"></i>
+@if(!empty($teacherClasses))
+    @foreach($teacherClasses as $class)
+        <li>
+            <a href="{{ route('attendance.summary', ['class' => str_replace(' ', '_', $class)]) }}">
+                <i class="bi bi-circle"></i><span>{{ $class }}</span>
             </a>
-            <ul id="records-secondary-nav" class="nav-content collapse">
-                @foreach(range(1, 6) as $level)
-                <li>
-                    <a href="{{ route('attendance.summary', ['class' => 'Form_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
         </li>
-
+    @endforeach
+@else
+    <li>
+        <span class="text-muted ps-4">No assigned classes</span>
+    </li>
+@endif
     </ul>
 </li>
 
 
-
-<!-- UPLOAD EXAM RESULTS -->
 <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#upload-exam-results-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-bar-chart"></i><span>Upload Exam Results</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
     <ul id="upload-exam-results-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        
-        <!-- PRIMARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#upload-results-primary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Primary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="upload-results-primary-nav" class="nav-content collapse">
-                @foreach(range(1, 7) as $level)
-                <li>
-                    <a href="{{ route('marks.create', ['class' => 'Standard_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Standard {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
-        </li>
 
-        <!-- SECONDARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#upload-results-secondary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Secondary School</span><i class="bi bi-chevron-down ms-auto"></i>
+        @php
+     $user = \App\Helpers\UserHelper::getLoggedInUser();
+    $teacherClasses = is_array($user?->classes) ? $user->classes : json_decode($user?->classes, true);
+@endphp
+
+@if(!empty($teacherClasses))
+    @foreach($teacherClasses as $class)
+        <li>
+            <a href="{{ route('marks.create', ['class' => str_replace(' ', '_', $class)]) }}">
+                <i class="bi bi-circle"></i><span>{{ $class }}</span>
             </a>
-            <ul id="upload-results-secondary-nav" class="nav-content collapse">
-                @foreach(range(1, 6) as $level)
-                <li>
-                    <a href="{{ route('marks.create', ['class' => 'Form_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
         </li>
+    @endforeach
+@else
+    <li>
+        <span class="text-muted ps-4">No assigned classes</span>
+    </li>
+@endif
+
 
     </ul>
 </li>
 
-    
 
-            <!-- EXAM RESULTS -->
+ <!-- EXAM RESULTS -->
 <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#exam-results-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-bar-chart"></i><span>Exam Results</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
     <ul id="exam-results-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        
-        <!-- PRIMARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#results-primary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Primary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="results-primary-nav" class="nav-content collapse">
-                @foreach(range(1, 7) as $level)
-                <li>
-                    <a href="{{ route('marks.show', ['class' => 'Standard_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Standard {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
-        </li>
+        @php
+     $user = \App\Helpers\UserHelper::getLoggedInUser();
+    $teacherClasses = is_array($user?->classes) ? $user->classes : json_decode($user?->classes, true);
+@endphp
 
-        <!-- SECONDARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#results-secondary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Secondary School</span><i class="bi bi-chevron-down ms-auto"></i>
+@if(!empty($teacherClasses))
+    @foreach($teacherClasses as $class)
+        <li>
+            <a href="{{ route('marks.show', ['class' => str_replace(' ', '_', $class)]) }}">
+                <i class="bi bi-circle"></i><span>{{ $class }}</span>
             </a>
-            <ul id="results-secondary-nav" class="nav-content collapse">
-                @foreach(range(1, 6) as $level)
-                <li>
-                    <a href="{{ route('marks.show', ['class' => 'Form_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
         </li>
-
+    @endforeach
+@else
+    <li>
+        <span class="text-muted ps-4">No assigned classes</span>
+    </li>
+@endif
     </ul>
 </li>
 
-
-      <!-- ASSIGNMENT RESULTS -->
+<!-- UPDATE MARKS -->
 <li class="nav-item">
-    <a class="nav-link collapsed" data-bs-target="#assignment-nav" data-bs-toggle="collapse" href="#">
-        <i class="bi bi-gem"></i><span>Assignments</span><i class="bi bi-chevron-down ms-auto"></i>
+    <a class="nav-link collapsed" data-bs-target="#edit-exam-results-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-pencil-square"></i><span>Edit Exam Results</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
-    <ul id="assignment-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        
-        <!-- PRIMARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#assign-primary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Primary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="assign-primary-nav" class="nav-content collapse">
-                @foreach(range(1, 7) as $level)
-                <li>
-                    <a href="{{ route('assignments.index', ['class' => 'Standard_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Standard {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
-        </li>
+    <ul id="edit-exam-results-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
 
-        <!-- SECONDARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#assign-secondary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Secondary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="assign-secondary-nav" class="nav-content collapse">
-                @foreach(range(1, 6) as $level)
+        @php
+            $user = \App\Helpers\UserHelper::getLoggedInUser();
+            $teacherClasses = is_array($user?->classes) ? $user->classes : json_decode($user?->classes, true);
+        @endphp
+
+        @if(!empty($teacherClasses))
+            @foreach($teacherClasses as $class)
                 <li>
-                    <a href="{{ route('assignments.index', ['class' => 'Form_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
+                    <a href="{{ route('marks.edit.filter', ['class' => str_replace(' ', '_', $class)]) }}">
+                        <i class="bi bi-circle"></i><span>{{ $class }}</span>
                     </a>
                 </li>
-                @endforeach
-            </ul>
-        </li>
+            @endforeach
+        @else
+            <li>
+                <span class="text-muted ps-4">No assigned classes</span>
+            </li>
+        @endif
 
     </ul>
 </li>
@@ -565,124 +480,137 @@
         <i class="bi bi-upload"></i><span>Upload Assignment</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
     <ul id="upload-assignment-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-        
-        <!-- PRIMARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#upload-primary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Primary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="upload-primary-nav" class="nav-content collapse">
-                @foreach(range(1, 7) as $level)
-                <li>
-                    <a href="{{ route('assignments.create', ['class' => 'Standard_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Standard {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
-        </li>
+          @php
+     $user = \App\Helpers\UserHelper::getLoggedInUser();
+    $teacherClasses = is_array($user?->classes) ? $user->classes : json_decode($user?->classes, true);
+@endphp
 
-        <!-- SECONDARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#upload-secondary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Secondary School</span><i class="bi bi-chevron-down ms-auto"></i>
+@if(!empty($teacherClasses))
+    @foreach($teacherClasses as $class)
+        <li>
+            <a href="{{ route('assignments.create', ['class' => str_replace(' ', '_', $class)]) }}">
+                <i class="bi bi-circle"></i><span>{{ $class }}</span>
             </a>
-            <ul id="upload-secondary-nav" class="nav-content collapse">
-                @foreach(range(1, 6) as $level)
-                <li>
-                    <a href="{{ route('assignments.create', ['class' => 'Form_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
         </li>
-
+    @endforeach
+@else
+    <li>
+        <span class="text-muted ps-4">No assigned classes</span>
+    </li>
+@endif
     </ul>
 </li>
 
 
-      
-<!-- CONFIRM PAYMENTS -->
+   <!-- ASSIGNMENT RESULTS -->
+<li class="nav-item">
+    <a class="nav-link collapsed" data-bs-target="#assignment-nav" data-bs-toggle="collapse" href="#">
+        <i class="bi bi-gem"></i><span>Assignments</span><i class="bi bi-chevron-down ms-auto"></i>
+    </a>
+    <ul id="assignment-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+          @php
+     $user = \App\Helpers\UserHelper::getLoggedInUser();
+    $teacherClasses = is_array($user?->classes) ? $user->classes : json_decode($user?->classes, true);
+@endphp
+
+@if(!empty($teacherClasses))
+    @foreach($teacherClasses as $class)
+        <li>
+            <a href="{{ route('assignments.index', ['class' => str_replace(' ', '_', $class)]) }}">
+                <i class="bi bi-circle"></i><span>{{ $class }}</span>
+            </a>
+        </li>
+    @endforeach
+@else
+    <li>
+        <span class="text-muted ps-4">No assigned classes</span>
+    </li>
+@endif
+    </ul>
+</li>
+
+
+
+ <!-- CONFIRM PAYMENTS -->
 <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#confirm-payments-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-cash-stack"></i><span>Confirm Payments</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
     <ul id="confirm-payments-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
 
-        <!-- PRIMARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#confirm-primary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Primary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="confirm-primary-nav" class="nav-content collapse">
-                @foreach(range(1, 7) as $level)
-                <li>
-                    <a href="{{ route('payments.create', ['class' => 'Standard_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Standard {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
-        </li>
+      @php
+    $user = \App\Helpers\UserHelper::getLoggedInUser();
+@endphp
 
-        <!-- SECONDARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#confirm-secondary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Secondary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="confirm-secondary-nav" class="nav-content collapse">
-                @foreach(range(1, 6) as $level)
-                <li>
-                    <a href="{{ route('payments.create', ['class' => 'Form_'.$level]) }}">
-                        <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
-                    </a>
-                </li>
-                @endforeach
-            </ul>
-        </li>
-
+@if($user && $user->school && $user->school->school_type == 'primary')
+    @foreach(range(1, 7) as $level)
+    <li>
+        <a href="{{ route('payments.create', ['class' => 'Standard_'.$level]) }}">
+            <i class="bi bi-circle"></i><span>Standard {{ $level }}</span>
+        </a>
+    </li>
+    @endforeach
+@elseif($user && $user->school && $user->school->school_type == 'secondary')
+    @foreach(range(1, 4) as $level)
+    <li>
+        <a href="{{ route('payments.create', ['class' => 'Form_'.$level]) }}">
+            <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
+        </a>
+    </li>
+    @endforeach
+@elseif($user && $user->school && $user->school->school_type == 'advanced')
+    @foreach(range(5, 6) as $level)
+    <li>
+        <a href="{{ route('payments.create', ['class' => 'Form_'.$level]) }}">
+            <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
+        </a>
+    </li>
+    @endforeach
+@endif
     </ul>
 </li>
 
-<!-- PAYMENT RECORDS -->
+
+@php
+    $user = \App\Helpers\UserHelper::getLoggedInUser();
+@endphp
+
 <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#payment-records-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-receipt"></i><span>Payment Records</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
     <ul id="payment-records-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-
-        <!-- PRIMARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#records-primary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Primary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="records-primary-nav" class="nav-content collapse">
-                @foreach(range(1, 7) as $level)
+        
+        @if($user && $user->school && $user->school->school_type === 'primary')
+            <!-- PRIMARY: Standard 1-7 -->
+            @foreach(range(1, 7) as $level)
                 <li>
                     <a href="{{ route('payments.index', ['class' => 'Standard_'.$level]) }}">
                         <i class="bi bi-circle"></i><span>Standard {{ $level }}</span>
                     </a>
                 </li>
-                @endforeach
-            </ul>
-        </li>
+            @endforeach
 
-        <!-- SECONDARY SCHOOL -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#records-secondary-nav" data-bs-toggle="collapse">
-                <i class="bi bi-circle"></i><span>Secondary School</span><i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="records-secondary-nav" class="nav-content collapse">
-                @foreach(range(1, 6) as $level)
+        @elseif($user && $user->school && $user->school->school_type === 'secondary')
+            <!-- SECONDARY: Form 1-4 -->
+            @foreach(range(1, 4) as $level)
                 <li>
                     <a href="{{ route('payments.index', ['class' => 'Form_'.$level]) }}">
                         <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
                     </a>
                 </li>
-                @endforeach
-            </ul>
-        </li>
+            @endforeach
+
+        @elseif($user && $user->school && $user->school->school_type === 'advanced')
+            <!-- ADVANCED: Form 5-6 -->
+            @foreach(range(5, 6) as $level)
+                <li>
+                    <a href="{{ route('payments.index', ['class' => 'Form_'.$level]) }}">
+                        <i class="bi bi-circle"></i><span>Form {{ $level }}</span>
+                    </a>
+                </li>
+            @endforeach
+        @endif
 
     </ul>
 </li>
@@ -701,6 +629,13 @@
         <a class="nav-link collapsed" href="{{ route('admin.create')}}">
           <i class="bi bi-card-list"></i>
           <span>Add New teacher</span>
+        </a>
+      </li><!-- End Register Page Nav -->
+
+        <li class="nav-item">
+        <a class="nav-link collapsed" href="{{ route('school.edit')}}">
+          <i class="bi bi-card-list"></i>
+          <span>Edit School</span>
         </a>
       </li><!-- End Register Page Nav -->
 
@@ -774,6 +709,7 @@
                 </div>
 
               </div>
+              
             </div><!-- End Sales Card -->
 
             <!-- Revenue Card -->
@@ -835,7 +771,47 @@
                 </div>
               </div>
 
-            </div><!-- End Customers Card -->
+            </div>
+            <!-- Matukio ya Sasa na Ya Karibuni -->
+<div class="col-xxl-4 col-md-6">
+  <div class="card info-card sales-card">
+    <div class="card-body">
+      <h5 class="card-title"><b>Matukio ya Sasa & Karibuni</b></h5>
+      <ul class="mb-0">
+        <li>Siku ya Wazazi – Juni 15</li>
+        <li>Warsha ya Walimu – Julai 2</li>
+        <li>Majira ya Mitihani – Julai 20</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Taarifa za Dharura -->
+<div class="col-xxl-4 col-md-6">
+  <div class="card info-card revenue-card">
+    <div class="card-body">
+      <h5 class="card-title"><b>Taarifa za Dharura</b></h5>
+      <p class="mb-0 text-danger">
+        Shule itafungwa kwa muda (Juni 10-12) kutokana na mvua kubwa.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Mawasiliano ya Viongozi -->
+<div class="col-xxl-4 col-md-12">
+  <div class="card info-card customers-card">
+    <div class="card-body">
+      <h5 class="card-title"><b>Mawasiliano ya Viongozi</b></h5>
+      <ul class="mb-0">
+        <li><strong>Mkuu wa Shule:</strong> head@mfano.ac.tz</li>
+        <li><strong>Mhasibu:</strong> accountant@mfano.ac.tz</li>
+        <li><strong>Mkuu wa Masomo:</strong> academic@mfano.ac.tz</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<!-- End Customers Card -->
 
 
 

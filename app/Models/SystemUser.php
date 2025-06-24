@@ -24,6 +24,12 @@ class SystemUser extends Authenticatable
     // Uhusiano na meza ya schools
     public function school()
     {
-        return $this->belongsTo(School::class, 'school_id', 'id'); // 'id' ni primary key ya schools
+        return $this->belongsTo(School::class, 'school_id', 'school_id'); // 'school_id' ni primary key ya schools
     }
+
+    // Accessor ya school_type (optional)
+public function getSchoolTypeAttribute()
+{
+    return $this->school->school_type;
+}
 }

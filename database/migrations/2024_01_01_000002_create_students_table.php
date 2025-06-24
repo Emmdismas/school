@@ -30,7 +30,8 @@ return new class extends Migration
             $table->unsignedBigInteger('parent_number');
             $table->string('parent_email');
             $table->string('relationship');
-            $table->binary('photo')->nullable();
+             $table->string('name');
+            $table->string('password');
             $table->integer('year_of_study')->nullable();
             $table->string('status')->default('Active');
             $table->timestamps();
@@ -39,11 +40,14 @@ return new class extends Migration
             $table->unique(['student_id', 'school_id']);
 
             // Foreign key to schools
-            $table->foreign('school_id')
-                  ->references('school_id')
-                  ->on('schools')
-                  ->onDelete('cascade');
+           $table->foreign('school_id', 'fk_students_school_id')
+      ->references('school_id')
+      ->on('schools')
+      ->onDelete('cascade');
+
         });
+        
+DB::statement("ALTER TABLE students ADD photo LONGBLOB");
     }
 
     public function down(): void

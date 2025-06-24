@@ -51,16 +51,15 @@
             <!-- Student Table -->
             <table class="table table-bordered">
                 <thead>
-                    <tr>
-                        <th>Student No</th>
-                        <th>Student Name</th>
-                        <th>Subject 1</th>
-                        <th>Subject 2</th>
-                        <th>Subject 3</th>
-                        <th>Subject 4</th>
-                        <th>Subject 5</th>
-                    </tr>
-                </thead>
+    <tr>
+        <th>Student No</th>
+        <th>Student Name</th>
+        @foreach($subjects as $subject)
+            <th>{{ $subject }}</th>
+        @endforeach
+    </tr>
+</thead>
+
                 <tbody>
                     @foreach ($studentsWithMarks as $index => $student)
                         <tr>
@@ -75,16 +74,17 @@
                             </td>
 
                             <!-- Alama za Masomo -->
-                            @foreach (range(1, 5) as $subjectNumber)
-                                <td>
-                                    <input type="number"
-                                           name="students[{{ $index }}][subject{{ $subjectNumber }}]"
-                                           value="{{ $student['subject' . $subjectNumber] ?? '' }}"
-                                           min="0"
-                                           max="100"
-                                           required>
-                                </td>
-                            @endforeach
+                           @foreach ($subjects as $subject)
+                            <td>
+                                <input type="number"
+                                    name="students[{{ $index }}][subjects][{{ $subject }}]"
+                                    value="{{ $student[$subject] ?? '' }}"
+                                    min="0"
+                                    max="100"
+                                    required>
+                            </td>
+                        @endforeach
+
 
                            
                         </tr>

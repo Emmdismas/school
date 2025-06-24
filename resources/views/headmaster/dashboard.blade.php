@@ -726,6 +726,25 @@
 
       <li class="nav-heading">Pages</li>
 
+
+   <li  class="nav-item" >
+        <a class="nav-link collapsed" href="{{ route('teacher.add')}}">
+          <i class="bi bi-card-list"></i>
+          <span>Register Teacher</span>
+        </a>
+</li>
+   <li  class="nav-item" >
+        <a class="nav-link collapsed" href="{{ route('accountant.register')}}">
+          <i class="bi bi-card-list"></i>
+          <span>Register Accountant</span>
+        </a>
+</li>
+   <li  class="nav-item" >
+        <a class="nav-link collapsed" href="{{ route('school-events.add')}}">
+          <i class="bi bi-card-list"></i>
+          <span>Add Events</span>
+        </a>
+</li>
       <li class="nav-item">
         <a class="nav-link collapsed" href="{{route ('contact')}}">
           <i class="bi bi-envelope"></i>

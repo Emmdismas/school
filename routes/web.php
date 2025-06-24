@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\StudentController;
-use App\Http\Controllers\StudentlistController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\MarksController;
@@ -16,11 +15,24 @@ use App\Http\Controllers\AdminRegistrationController;
 use App\Http\Controllers\StudentProfileController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\AccountantController;
+use App\Http\Controllers\SchoolEventController;
+use App\Http\Controllers\NotificationController;
+//testing
 
 Route::get('/n', function () {
     return view('home');
 })->name('home');
+
+
+
+
+Route::get('/addteacher', [TeacherController::class, 'create'])
+     ->middleware('auth')
+     ->name('teacher.add');
+
+
 //ADMIN REGISTRATION 
 Route::get('/admin/create', [AdminRegistrationController::class, 'create'])->name('admin.create');
 Route::post('/admin/store', [AdminRegistrationController::class, 'store'])->name('admin.store');
@@ -32,15 +44,17 @@ Route::get('/attendance/{class}/{student_id}', [AttendanceController::class, 'ge
 
 //testing
 
-//redirexct
-
+//redirect
 Route::get('/', function () {
     return redirect()->route('login');
 });
-// Routes za login na logout
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.process');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+//redirect login
+Route::get('/login', function () {
+    return view('login');
+})->name('login');
+
+
 
 // Routes za kila role
 Route::middleware('auth')->group(function () {
@@ -51,6 +65,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/headmaster', function () {
         return view('headmaster.dashboard'); // Ukurasa wa headmaster
     })->name('headmaster');
+
+    Route::get('/Accountant', function () {
+        return view('accountant.dashboard'); // Ukurasa wa accountant
+    })->name('accountant');
 
     Route::get('/teacher', function () {
         return view('teacher.dashboard'); // Ukurasa wa teacher
@@ -74,22 +92,41 @@ require __DIR__.'/auth.php';
 
 Route::get('/school', [SchoolController::class, 'create'])->name('schools.create');
 Route::post('/school', [SchoolController::class, 'store'])->name('schools.store');
-
+Route::get('/school/edit', [SchoolController::class, 'edit'])->name('school.edit');
+Route::put('/school/update', [SchoolController::class, 'update'])->name('school.update');
 
 //STUDENT
 
 //Register students
 
 Route::post('/student_store', [StudentController::class, 'store'])->name('student.register');
-Route::get('/student_register', [StudentlistController::class, 'create'])->name('register.create'); //student profile
+Route::get('/student_register', [StudentController::class, 'create'])->name('register.create'); //student registration
 Route::get('/students/edit/{student_id}', [StudentController::class, 'edit'])->name('students.edit');// Route for editing the student
 Route::put('/students/update/{student_id}', [StudentController::class, 'update'])->name('students.update'); // Route for updating the student data
+
+//Teachers routes
+
+Route::middleware('auth')->group(function () {
+    Route::get('/teacher/register', [TeacherController::class, 'create'])->name('teacher.register');
+    Route::post('/teacher/store', [TeacherController::class, 'store'])->name('teacher.store');
+});
+
+//Accountant
+
+Route::middleware('auth')->group(function () {
+    Route::get('/accountant/register', [AccountantController::class, 'create'])->name('accountant.register');
+    Route::post('/accountant/store', [AccountantController::class, 'store'])->name('accountant.store');
+});
+
+//SMS ROUTES
+Route::get('/notifications/status', [NotificationController::class, 'status'])->name('notifications.status');
 
 
 //view students
 Route::get('/student_index/{class}', [StudentController::class, 'index'])->name('student.index');
 Route::post('/student/{class}', [StudentController::class, 'store'])->name('student.store');
 Route::get('/student/form/{class}', [StudentController::class , 'create'])->name('student.create');
+//Student Profile
 Route::get('/students/{student_id}/{school_id}/profile', [StudentController::class, 'fullProfile'])->name('students.fullProfile');
 
 //STUDENT PROFILE 
@@ -109,6 +146,11 @@ Route::get('/attendance/{class}/details/{date}', [AttendanceController::class, '
 Route::get('/contact', [ContactController::class, 'create'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
+//EVENTS
+Route::get('/events', [SchoolEventController::class, 'index'])->name('school-events.index');
+Route::post('/events', [SchoolEventController::class, 'store'])->name('school-events.store');
+Route::post('/add/events', [SchoolEventController::class, 'create'])->name('school-events.add');
+
 
 
 //MARKS
@@ -116,6 +158,8 @@ Route::post('/marks/{class}/store', [MarksController::class, 'store'])->name('ma
 Route::get('/marks/{class}/create', [MarksController::class, 'create'])->name('marks.create');
 Route::get('/marks/{class}/view', [MarksController::class, 'show'])->name('marks.show');
 Route::get('/marks/{class}/index', [MarksController::class, 'index'])->name('marks.index');
+Route::get('/marks/{class}/edit', [MarksController::class, 'edit'])->name('marks.edit');
+Route::post('/marks/{class}/update', [MarksController::class, 'update'])->name('marks.update');
 
 
 //PAYMENT
@@ -133,12 +177,6 @@ Route::delete('/assignments/{class}/{id}', [AssignmentController::class, 'destro
 
 
 //TESTING
-//login
-Route::get('/login', function () {
-    return view('loginn');
-})->name('login');
-
-Route::post('/loginn_system', [AuthController::class, 'login'])->name('logiin');
 
 
 
@@ -170,3 +208,8 @@ Route::middleware(['auth', 'role:teacher'])->group(function () {
 
 });
 
+
+//LOGIN ROUTES
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.process');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

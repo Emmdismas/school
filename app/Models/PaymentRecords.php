@@ -9,7 +9,7 @@ class PaymentRecords extends Model
 {
     use HasFactory;
 
-    protected $table = 'payment_records'; // Jina la jedwali
+    protected $table = 'payment_records';
     protected $fillable = [
         'school_id',
         'student_id',
@@ -17,9 +17,9 @@ class PaymentRecords extends Model
         'student_name', 
         'class',
         'payment_type',
-        'amount',
-        'receipt_content',
-        'receipt_filename',
+        'amount_paid',
+        'total_paid',
+        'total_percentage',
         ];
 
     

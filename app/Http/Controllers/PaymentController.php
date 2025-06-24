@@ -2,32 +2,57 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use App\Models\PaymentRecords;
 use App\Models\Students;
+use Illuminate\Support\Facades\DB;
+use App\Models\School;
+use App\Helpers\UserHelper;
 
 class PaymentController extends Controller
 {
     public function index($class)
-    {
-        $school_id = auth()->user()->school_id;
+{
+    $user = UserHelper::getLoggedInUser();
 
-        $payments  = PaymentRecords::where('class', $class)
-        ->where('school_id', $school_id)
+    if (!$user || !$user->school_id) {
+        abort(403, 'Unauthorized or school not assigned.');
+    }
+
+    $schoolId = $user->school_id;
+
+    $payments = PaymentRecords::where('class', $class)
+        ->where('school_id', $schoolId)
         ->get();
 
-        return view('payment.view', compact('payments', 'class'));
-    }
+    $school = DB::table('schools')->where('school_id', $schoolId)->first();
+
+    $feeStructure = json_decode($school->fees_structure, true);
+    $normalizedClass = ucwords(str_replace('_', ' ', strtolower($class)));
+    $classFees = $feeStructure[$normalizedClass] ?? ['total_fee' => 1];
+
+    $totalFee = (int) ($classFees['total_fee'] ?? 1);
+
+    return view('payment.view', compact('payments', 'class', 'totalFee'));
+}
 
     public function create($class)
     {
-        $school_id = auth()->user()->school_id;
-        
+        $user = UserHelper::getLoggedInUser();
+
+        // Ikiwa user hajapatikana au hana school_id, rudisha 403
+        if (!$user || !$user->school_id) {
+            abort(403, 'Unauthorized or school not assigned.');
+        }
+
+        $schoolId = $user->school_id;
+
         // Fetch students from class table
-            $students = Students::where('class', $class)
-            ->where('school_id', $school_id)
+        $students = Students::where('class', $class)
+            ->where('school_id', $schoolId)
             ->get();
 
         if ($students->isEmpty()) {
@@ -38,52 +63,99 @@ class PaymentController extends Controller
     }
 
     public function store(Request $request, $class)
-    {
+{
+    $validated = $request->validate([
+        'student_id' => 'required|integer',
+        'student_name' => 'required|string',
+        'payment_type' => 'required|string',
+        'amount' => 'required|numeric|min:1',
+        'academic_year' => 'required|string',
+    ]);
 
-            $validated = $request->validate([
-                'student_id' => 'required|integer',
-                'student_name' => 'required|string',
-                'payment_type' => 'required|string',
-                'amount' => 'required|numeric|min:1',
-                'receipt' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-                'academic_year' => 'required|string',
-            ]);
+    $user = UserHelper::getLoggedInUser();
 
-           
-    
-        $schoolId = Auth::user()->school_id ?? null;
-        if (!$schoolId) {
-            return back()->with('error', 'User does not belong to any school.');
-        }
-
-        $fileContent = file_get_contents($request->file('receipt')->getRealPath());
-        $fileName = $request->file('receipt')->getClientOriginalName();
-
-
-        PaymentRecords::create([
-            'school_id' => $schoolId,
-            'academic_year' => $validated['academic_year'],
-            'class' => $class,
-            'student_id' => $validated['student_id'],
-            'student_name' => $validated['student_name'],
-            'payment_type' => $validated['payment_type'],
-            'amount' => $validated['amount'],
-            'receipt_content' => $fileContent,
-            'receipt_filename' => $fileName,
-            
-        ]);
-
-        return redirect()->back()->with('success', 'Payment recorded successfully!');
+    if (!$user || !$user->school_id) {
+        abort(403, 'Unauthorized or school not assigned.');
     }
+
+    $schoolId = $user->school_id;
+
+    // Fetch school from DB
+    $school = DB::table('schools')->where('school_id', $schoolId)->first();
+
+    if (!$school) {
+        abort(404, 'School not found.');
+    }
+
+    // Decode the fees_structure JSON
+   // Decode the fees_structure JSON
+$feeStructure = json_decode($school->fees_structure, true);
+
+// Normalize class name: Standard_1 => Standard 1
+$normalizedClass = ucwords(str_replace('_', ' ', strtolower($class)));
+
+if (!isset($feeStructure[$normalizedClass])) {
+    abort(400, "Fee structure for class '$normalizedClass' not found.");
+}
+
+$classFees = $feeStructure[$normalizedClass];
+
+    $totalFee = isset($classFees['total_fee']) ? (int)$classFees['total_fee'] : 1;
+
+    // Fetch previous payments
+    $previousTotal = PaymentRecords::where('student_id', $validated['student_id'])
+        ->where('academic_year', $validated['academic_year'])
+        ->where('school_id', $schoolId)
+        ->sum('amount_paid');
+
+    $amountPaid = $validated['amount'];
+    $totalPaid = $previousTotal + $amountPaid;
+
+    // Calculate percentage
+    $totalPercentage = ($totalPaid / $totalFee) * 100;
+
+    // Save record
+    PaymentRecords::create([
+        'school_id' => $schoolId,
+        'academic_year' => $validated['academic_year'],
+        'class' => $class,
+        'student_id' => $validated['student_id'],
+        'student_name' => $validated['student_name'],
+        'payment_type' => $validated['payment_type'],
+        'amount_paid' => $amountPaid,
+        'total_paid' => $totalPaid,
+        'total_percentage' => $totalPercentage,
+    ]);
+    // Tafuta mwanafunzi
+$student = Students::where('student_id', $validated['student_id'])->first();
+
+$message = "Habari {$student->parent_name}, ada ya mwanao {$student->student_name} imethibitishwa kiasi cha shilingi {$amountPaid}. Ahsante kwa ushirikiano.";
+
+Http::post(env('APP_URL') . '/api/notify/sms', [
+    'phone' => $student->parent_number,
+    'message' => $message
+]);
+
+
+    return redirect()->back()->with('success', 'Payment recorded successfully!');
+}
+
 
     public function downloadReceipt($class, $id)
     {
-        $school_id = auth()->user()->school_id;
+        $user = UserHelper::getLoggedInUser();
+
+        // Ikiwa user hajapatikana au hana school_id, rudisha 403
+        if (!$user || !$user->school_id) {
+            abort(403, 'Unauthorized or school not assigned.');
+        }
+
+        $schoolId = $user->school_id;
 
         $payment = PaymentRecords::where('id', $id)
-        ->where('class', $class)
-        ->where('school_id', $school_id)
-        ->firstOrFail();
+            ->where('class', $class)
+            ->where('school_id', $schoolId)
+            ->firstOrFail();
 
 
         if (!$payment->receipt_content) {
