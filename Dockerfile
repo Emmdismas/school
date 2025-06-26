@@ -25,7 +25,7 @@ RUN php artisan config:cache && php artisan route:cache && php artisan view:cach
 
 # Copy bot code
 WORKDIR /var/www/html
-COPY whatsapp-bot/ ./whatsapp-bot/
+COPY whatsapp_bot/ ./whatsapp_bot/
 
 # Install bot dependencies
 WORKDIR /var/www/html/whatsapp-bot
