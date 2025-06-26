@@ -29,11 +29,9 @@ return new class extends Migration
             $table->string('role');
             $table->string('username');
             $table->string('password');
+            $table->binary('photo')->nullable();
             $table->timestamps();
         });
-
-        
-DB::statement("ALTER TABLE accountants ADD photo LONGBLOB");
     
     }
 

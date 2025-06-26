@@ -34,11 +34,9 @@ return new class extends Migration
     $table->string('role');
     $table->boolean('is_class_teacher')->default(false);
     $table->string('class_incharge')->nullable();
+    $table->binary('photo')->nullable();
     $table->timestamps();
 });
-
-
-DB::statement("ALTER TABLE teachers ADD photo LONGBLOB");
     }
 
     /**
