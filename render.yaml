@@ -13,7 +13,7 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_KEY
-        value: base64:yz1NlVfx3WTLr1iFTg5jHIj1lzFPEAOvDuX2mW+pek8=
+        value: base64:txJRz6ls+WH5voD3wK++MLVx7/4oX4t6JqYOewd1HPs=
       - key: APP_URL
         value: https://school-xo1a.onrender.com
       - key: DB_CONNECTION
