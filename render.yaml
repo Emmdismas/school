@@ -1,41 +1,40 @@
-envVars:
-  - key: APP_NAME
-    value: SchoolApp
-  - key: APP_ENV
-    value: production
-  - key: APP_KEY
-    value: base64:txJRz6ls+WH5voD3wK++MLVx7/4oX4t6JqYOewd1HPs=
-  - key: APP_DEBUG
-    value: false
-  - key: APP_URL
-    value: https://school-xo1a.onrender.com
-  - key: FRONTEND_URL
-    value: https://school-xo1a.onrender.com
-  - key: APP_TIMEZONE
-    value: Africa/Nairobi
-  - key: DB_CONNECTION
-    value: pgsql
-  - key: DB_HOST
-    value: dpg-d1dlc0ur433s73fhd0mg-a.oregon-postgres.render.com
-  - key: DB_PORT
-    value: 5432
-  - key: DB_DATABASE
-    value: school_db_4yem
-  - key: DB_USERNAME
-    value: school_db_4yem_user
-  - key: DB_PASSWORD
-    value: HA8PxQFFZii5A0k3tqNggicDG5vpLxM2
-  - key: SESSION_DRIVER
-    value: database
-  - key: CACHE_STORE
-    value: database
-  - key: QUEUE_CONNECTION
-    value: database
-  - key: FILESYSTEM_DISK
-    value: local
-  - key: MAIL_MAILER
-    value: log
-  - key: LOG_CHANNEL
-    value: stack
-  - key: VITE_APP_NAME
-    value: SchoolApp
+services:
+  - type: web
+    name: schoolapp-fullstack
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 80
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        value: base64:txJRz6ls+WH5voD3wK++MLVx7/4oX4t6JqYOewd1HPs=
+      - key: APP_URL
+        value: https://school-xo1a.onrender.com
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: dpg-d1dlc0ur433s73fhd0mg-a.oregon-postgres.render.com
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        value: school_db_4yem
+      - key: DB_USERNAME
+        value: school_db_4yem_user
+      - key: DB_PASSWORD
+        value: HA8PxQFFZii5A0k3tqNggicDG5vpLxM2
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: WHATSAPP_API_KEY
+        value: <your_whatsapp_key>
+      - key: BOT_WEBHOOK_URL
+        value: <your_webhook_url>

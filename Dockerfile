@@ -1,28 +1,38 @@
-FROM php:8.2-cli
+FROM php:8.2-apache
 
+# Install PHP extensions & system dependencies
 RUN apt-get update && apt-get install -y \
-    git unzip curl zip \
-    libzip-dev libpng-dev libonig-dev libxml2-dev \
-    nodejs npm python3 python3-pip supervisor \
-    && docker-php-ext-install zip pdo pdo_mysql mbstring bcmath xml
+    git zip unzip curl libzip-dev libonig-dev libxml2-dev \
+    python3 python3-pip supervisor \
+    && docker-php-ext-install pdo pdo_mysql zip mbstring bcmath xml
 
+# Enable Apache rewrite module
+RUN a2enmod rewrite
+
+# Set working directory
 WORKDIR /var/www/html
 
-RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
+# Copy app files
+COPY . /var/www/html/
 
-COPY . .
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer install --no-dev --optimize-autoloader
 
-RUN composer install
-RUN npm install
-RUN npm run build
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+ && chmod -R 775 /var/www/html/storage \
+ && chmod -R 775 /var/www/html/bootstrap/cache
 
-# ⚠️ Usijaribu ku-cache config hapa
-# RUN php artisan config:cache ...
-
+# Install Python dependencies for WhatsApp bot
 WORKDIR /var/www/html/whatsapp_bot
 RUN pip3 install -r requirements.txt
 
+# Copy Supervisor config
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-EXPOSE 10000
+# Expose Apache port
+EXPOSE 80
+
+# Start Laravel (Apache) + WhatsApp bot
 CMD ["/usr/bin/supervisord"]
