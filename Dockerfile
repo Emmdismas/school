@@ -7,36 +7,30 @@ RUN apt-get update && apt-get install -y \
     php-mysql php-pgsql php-mbstring php-xml php-bcmath php-curl \
     nodejs npm python3 python3-pip supervisor
 
-# Set working directory
+# Set working directory for Laravel
 WORKDIR /var/www/html
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
 
-# Copy Laravel code
-COPY laravel-app/ ./laravel-app/
+# Copy entire Laravel app (since it's in root) + bot folder
+COPY . .
 
 # Install Laravel dependencies
-WORKDIR /var/www/html/laravel-app
 RUN composer install
 RUN npm install
 RUN npm run build
 RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
 
-# Copy bot code
-WORKDIR /var/www/html
-COPY whatsapp_bot/ ./whatsapp_bot/
-
 # Install bot dependencies
 WORKDIR /var/www/html/whatsapp_bot
 RUN pip3 install -r requirements.txt
 
-
-# Copy supervisor config
+# Copy Supervisor config
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Expose Laravel port
 EXPOSE 10000
 
-# Start both Laravel and the bot
+# Start Laravel and WhatsApp bot
 CMD ["/usr/bin/supervisord"]
