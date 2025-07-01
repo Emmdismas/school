@@ -41,17 +41,17 @@ RUN chown -R www-data:www-data /var/www/html \
 # OPTION 1: Default – Install Python dependencies directly from current context
 # (Note: works only if whatsapp_bot/requirements.txt is already copied)
 # ================================
-WORKDIR /var/www/html/whatsapp_bot
-RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements.txt
-
-# ================================
-# OPTION 2: (Uncomment these lines to use this method if above fails)
-# RUN mkdir -p /var/www/html/whatsapp_bot
-# COPY whatsapp_bot/requirements.txt /var/www/html/whatsapp_bot/requirements.txt
 # WORKDIR /var/www/html/whatsapp_bot
 # RUN pip3 install --upgrade pip
 # RUN pip3 install -r requirements.txt
+
+# ================================
+# OPTION 2: (Uncomment these lines to use this method if above fails)
+RUN mkdir -p /var/www/html/whatsapp_bot
+COPY whatsapp_bot/requirements.txt /var/www/html/whatsapp_bot/requirements.txt
+WORKDIR /var/www/html/whatsapp_bot
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
 # ================================
 
 # ================================
